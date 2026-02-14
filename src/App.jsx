@@ -132,7 +132,7 @@ const IGPosterModal = ({ patient, onClose }) => {
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.href = image;
-      link.download = `BloodLink-${patient.patient.replace(/\s+/g, '-')}.png`;
+      link.download = `BloodLink-Poster-${patient.patient.replace(/\s+/g, '-')}.png`;
       link.click();
     } catch (error) {
       console.error("Gagal download poster:", error);
@@ -144,85 +144,91 @@ const IGPosterModal = ({ patient, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-[99999] flex items-start justify-center bg-black/90 backdrop-blur-sm p-4 pt-10 animate-fadeIn overflow-y-auto">
-      <div className="relative w-full max-w-[340px] flex flex-col items-center">
+      <div className="relative w-full max-w-[400px] flex flex-col items-center">
+        
         <button 
           onClick={onClose} 
-          className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full mb-4 flex items-center gap-2 font-bold backdrop-blur-sm transition-all text-sm"
+          className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full mb-6 flex items-center gap-2 font-bold backdrop-blur-sm transition-all text-sm"
         >
           <X size={18} /> Tutup
         </button>
 
         {/* AREA POSTER */}
-        <div ref={posterRef} className="w-[320px] bg-gradient-to-b from-red-600 to-red-800 p-5 rounded-[2rem] shadow-2xl text-white relative overflow-hidden box-border border-4 border-white/20">
+        <div ref={posterRef} className="w-[360px] flex-shrink-0 bg-gradient-to-br from-red-600 to-red-900 p-7 rounded-[2.5rem] shadow-2xl text-white relative overflow-hidden border-[8px] border-white box-border">
           
           {/* Header */}
-          <div className="relative z-10 flex justify-between items-center mb-5">
-            <div className="flex items-center gap-2">
-              <div className="bg-white/90 text-red-600 p-1.5 rounded-lg shadow-sm">
-                <Droplet size={20} fill="currentColor" />
+          <div className="relative z-10 flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-white text-red-600 p-2.5 rounded-2xl shadow-lg">
+                <Droplet size={28} fill="currentColor" />
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-base leading-none tracking-tight">URGENT</span>
-                <span className="text-[9px] font-medium opacity-90 tracking-wider">BUTUH DONOR</span>
+              <div>
+                <h3 className="font-black text-2xl leading-none tracking-tight">URGENT</h3>
+                <p className="text-[10px] opacity-90 font-black uppercase tracking-[0.2em] mt-1">Butuh Donor Darah</p>
               </div>
             </div>
-            <div className="bg-white/20 px-3 py-1 rounded-full border border-white/10">
-              <span className="text-[9px] font-bold tracking-widest">PMR SMANEL</span>
+            <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/20">
+              PMR SMANEL
             </div>
           </div>
 
           {/* Card Putih */}
-          <div className="relative z-10 bg-white text-gray-800 rounded-[1.5rem] p-5 shadow-lg mb-5">
+          <div className="relative z-10 bg-white text-[#2C3E50] rounded-[2rem] p-6 shadow-2xl mb-6">
             
             {/* Golongan Darah */}
-            <div className="text-center mb-5 border-b border-gray-100 pb-5">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Golongan Darah</p>
-              <div className="flex items-center justify-center gap-1 mb-3"> 
-                <span className="text-7xl font-bold text-red-600 tracking-tighter leading-none">{patient.bloodType}</span>
-                <span className="text-4xl font-bold text-gray-400 leading-none self-center">{safeText(patient.rhesus)}</span>
+            <div className="text-center mb-6 border-b border-gray-100 pb-6">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Golongan Darah</p>
+              
+              <div className="flex items-center justify-center gap-2 mb-4"> 
+                <span className="text-8xl font-black text-red-600 tracking-tighter leading-none">{patient.bloodType}</span>
+                <span className="text-5xl font-black text-gray-300 leading-none self-center">{safeText(patient.rhesus)}</span>
               </div>
-              <div className="inline-block bg-red-50 text-red-600 px-4 py-1.5 rounded-full text-xs font-bold border border-red-100 shadow-sm">
+              
+              <div className="inline-block bg-red-50 text-red-600 px-5 py-2 rounded-full text-sm font-black uppercase tracking-widest border border-red-100 shadow-sm">
                 Butuh {patient.amount} Kantong
               </div>
             </div>
 
             {/* Detail Pasien */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-red-500 shrink-0"><User size={16} /></div>
-                <div className="overflow-hidden">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Pasien</p>
-                  <p className="font-bold text-sm truncate">{patient.patient}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-red-500 shrink-0"><MapPin size={16} /></div>
-                <div className="overflow-hidden">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Lokasi</p>
-                  <p className="font-bold text-sm leading-tight line-clamp-2">{patient.hospital}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-red-500 shrink-0"><Phone size={16} /></div>
+            <div className="space-y-5">
+              <div className="flex items-start gap-4">
+                <div className="bg-gray-50 p-3 rounded-full text-red-500"><User size={20} /></div>
                 <div>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Hubungi Keluarga</p>
-                  <p className="font-bold text-lg text-gray-800 tracking-wide">{patient.contact}</p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Pasien</p>
+                  <p className="font-bold text-lg leading-tight text-gray-800">{patient.patient}</p>
+                  <p className="text-xs text-gray-500 font-medium mt-0.5">{patient.age ? `${patient.age} Tahun` : ''}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="bg-gray-50 p-3 rounded-full text-red-500"><MapPin size={20} /></div>
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Lokasi / RS</p>
+                  <p className="font-bold text-lg leading-tight text-gray-800">{patient.hospital}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="bg-gray-50 p-3 rounded-full text-red-500"><Phone size={20} /></div>
+                <div>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Hubungi Keluarga</p>
+                  <p className="font-bold text-xl leading-tight text-gray-800">{patient.contact}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="relative z-10 text-center">
-            <p className="text-[10px] text-white/80 italic mb-3">"Setetes darah Anda, nyawa bagi sesama."</p>
-            <div className="flex flex-col items-center gap-2">
-                <div className="flex items-center gap-2 bg-black/20 px-3 py-1.5 rounded-full">
-                   <Instagram size={14} />
-                   <span className="text-[10px] font-bold">@pmr_smanel</span>
+          <div className="relative z-10 text-center flex flex-col items-center w-full px-1">
+            <p className="text-xs font-bold text-white/90 mb-4 italic">"Setetes darah Anda, nyawa bagi sesama."</p>
+            
+            <div className="w-full flex flex-col gap-2.5">
+                <div className="bg-black/30 backdrop-blur-sm rounded-xl p-2.5 flex items-center justify-center gap-3 border border-white/10 w-full">
+                  <Instagram size={18} />
+                  <span className="text-xs font-black tracking-wide">@pmr_smanel</span>
                 </div>
-                <div className="flex items-center gap-2 bg-white text-red-700 px-3 py-1.5 rounded-full shadow-md">
-                   <Globe size={14} />
-                   <span className="text-[10px] font-bold tracking-wide">bloodlink.pmrsmanel.my.id</span>
+                
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-2.5 flex items-center justify-center gap-3 border border-white/20 w-full shadow-lg">
+                    <Globe size={18} className="text-red-600" />
+                    <p className="text-xs font-black tracking-widest text-red-700">bloodlink.pmrsmanel.my.id</p>
                 </div>
             </div>
           </div>
@@ -231,7 +237,7 @@ const IGPosterModal = ({ patient, onClose }) => {
         <button 
           onClick={handleDownload}
           disabled={downloading || !isLibLoaded}
-          className="mt-6 w-full py-3.5 bg-white text-red-600 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg hover:bg-gray-50 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="mt-8 w-full py-4 bg-white text-red-600 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {downloading ? <><Loader size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Simpan Gambar</>}
         </button>
@@ -470,6 +476,9 @@ const VolunteerList = ({ volunteers, setView }) => {
   );
 };
 
+// ... FOOTER, FORMS, ADMIN, LOGIN components (Sama seperti sebelumnya) ...
+// Saya akan menyertakan komponen-komponen ini secara lengkap dalam kode di bawah.
+
 const AboutStats = ({ volunteers, requests }) => {
   const activeVolunteerCount = volunteers ? volunteers.filter(v => v.status === 'Aktif').length : 0;
   const fulfilledBagsCount = requests ? requests.filter(r => r.status === 'Terpenuhi').reduce((sum, req) => sum + (parseInt(req.amount) || 0), 0) : 0;
@@ -528,6 +537,52 @@ const Footer = ({ setView }) => (
     <div className="container mx-auto px-4 text-center mt-12 pt-8 border-t border-gray-700 text-sm text-gray-400">&copy; 2026 PMR SMANEL. All rights reserved.</div>
   </footer>
 );
+
+// 9. FORMS
+const RequestForm = ({ onSubmit, isLoading }) => {
+  const [form, setForm] = useState({ patient: '', age: '', hospital: '', bloodType: 'A', rhesus: '+', amount: '', contact: '', contact2: '' });
+  return (
+    <div className="bg-white p-8 rounded-2xl shadow-lg max-w-2xl mx-auto my-10 border-t-4 border-[#C0392B]">
+      <h2 className="text-2xl font-bold text-[#2C3E50] mb-6 flex items-center gap-2"><AlertCircle className="text-[#C0392B]" /> Form Permohonan Darah</h2>
+      <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Nama Pasien</label><input required type="text" className="w-full border rounded-lg p-2" placeholder="Nama Lengkap" value={form.patient} onChange={e => setForm({...form, patient: e.target.value})} /></div>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Usia (Opsional)</label><input type="number" className="w-full border rounded-lg p-2" placeholder="Contoh: 45" value={form.age} onChange={e => setForm({...form, age: e.target.value})} /></div>
+        </div>
+        <div><label className="block text-sm font-semibold text-gray-700 mb-1">Dirawat di</label><input required type="text" className="w-full border rounded-lg p-2" placeholder="Nama Rumah Sakit / Puskesmas" value={form.hospital} onChange={e => setForm({...form, hospital: e.target.value})} /></div>
+        <div className="grid grid-cols-2 gap-4">
+          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Gol Darah (Rhesus)</label><div className="flex gap-2"><select className="w-full border rounded-lg p-2 bg-white" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select><select className="w-full border rounded-lg p-2 bg-white" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">+</option><option value="-">-</option></select></div></div>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Jumlah (Kantong)</label><input required type="number" className="w-full border rounded-lg p-2" placeholder="Contoh: 2" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} /></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label className="block text-sm font-semibold text-gray-700 mb-1">HP (Utama)</label><input required type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.contact} onChange={e => setForm({...form, contact: e.target.value})} /></div>
+            <div><label className="block text-sm font-semibold text-gray-700 mb-1">HP Alternatif (Opsional)</label><input type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.contact2} onChange={e => setForm({...form, contact2: e.target.value})} /></div>
+        </div>
+        <button disabled={isLoading} type="submit" className="w-full bg-[#C0392B] text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400">{isLoading ? 'Mengirim Data...' : 'Kirim Permohonan'}</button>
+      </form>
+    </div>
+  );
+};
+
+const VolunteerForm = ({ onSubmit, isLoading }) => {
+  const [form, setForm] = useState({ name: '', bloodType: 'A', rhesus: '+', phone: '', address: '', lastDonorDate: '' });
+  return (
+    <div className="bg-white p-8 rounded-2xl shadow-lg max-w-2xl mx-auto my-10 border-t-4 border-[#2C3E50]">
+      <h2 className="text-2xl font-bold text-[#2C3E50] mb-6 flex items-center gap-2"><UserPlus className="text-[#2C3E50]" /> Form Pendaftaran Relawan</h2>
+      <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-4">
+        <div><label className="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label><input required type="text" className="w-full border rounded-lg p-2" value={form.name} onChange={e => setForm({...form, name: e.target.value})} /></div>
+        <div className="grid grid-cols-2 gap-4">
+          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Golongan Darah</label><select className="w-full border rounded-lg p-2 bg-white" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Rhesus</label><select className="w-full border rounded-lg p-2 bg-white" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">Positif (+)</option><option value="-">Negatif (-)</option></select></div>
+        </div>
+        <div><label className="block text-sm font-semibold text-gray-700 mb-1">Alamat Domisili</label><input required type="text" className="w-full border rounded-lg p-2" value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
+        <div><label className="block text-sm font-semibold text-gray-700 mb-1">Waktu Donor Terakhir (Opsional)</label><input type="date" className="w-full border rounded-lg p-2" value={form.lastDonorDate} onChange={e => setForm({...form, lastDonorDate: e.target.value})} /><p className="text-xs text-gray-500 mt-1">Biarkan kosong jika belum pernah donor.</p></div>
+        <div><label className="block text-sm font-semibold text-gray-700 mb-1">No. HP / WA</label><input required type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
+        <button disabled={isLoading} type="submit" className="w-full bg-[#2C3E50] text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors disabled:bg-gray-400">{isLoading ? 'Menyimpan...' : 'Daftar Jadi Relawan'}</button>
+      </form>
+    </div>
+  );
+};
 
 const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock, setPmiStock, mobileUnit, setMobileUnit, onLogout, showToast, showConfirm }) => {
   const [activeTab, setActiveTab] = useState('requests');
@@ -629,16 +684,16 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
   return (
     <div className="min-h-screen bg-gray-100 flex relative">
       {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSidebarOpen(false)}></div>}
-      <aside className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-[#2C3E50] text-white transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-         <div className="p-6 font-bold text-xl border-b border-gray-700 flex justify-between">Admin Panel <button className="md:hidden" onClick={() => setSidebarOpen(false)}><X/></button></div>
-         <nav className="p-4 space-y-2">
-            <button onClick={() => setActiveTab('requests')} className={`block w-full text-left p-3 rounded ${activeTab==='requests'?'bg-[#C0392B]':''}`}>Permohonan</button>
-            <button onClick={() => setActiveTab('volunteers')} className={`block w-full text-left p-3 rounded ${activeTab==='volunteers'?'bg-[#C0392B]':''}`}>Relawan</button>
-            <button onClick={() => setActiveTab('stock')} className={`block w-full text-left p-3 rounded ${activeTab==='stock'?'bg-[#C0392B]':''}`}>Stok & Jadwal</button>
-            <button onClick={onLogout} className="block w-full text-left p-3 rounded text-red-300 mt-10">Logout</button>
-         </nav>
-       </aside>
-       <main className="flex-1 p-4 md:p-8 ml-0 md:ml-64">
+      <aside className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-[#2C3E50] text-white transition-transform duration-300 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+        <div className="p-6 border-b border-gray-700 flex justify-between items-center"><div><h2 className="text-xl font-bold">Admin Panel</h2><p className="text-xs text-gray-400">PMR SMANEL</p></div><button onClick={() => setSidebarOpen(false)} className="md:hidden text-gray-300"><X size={20} /></button></div>
+        <nav className="p-4 space-y-2">
+          <button onClick={() => { setActiveTab('requests'); setShowAddForm(false); setSidebarOpen(false); }} className={`w-full text-left p-3 rounded hover:bg-white/10 ${activeTab === 'requests' ? 'bg-[#C0392B]' : ''}`}>Permohonan</button>
+          <button onClick={() => { setActiveTab('volunteers'); setShowAddForm(false); setSidebarOpen(false); }} className={`w-full text-left p-3 rounded hover:bg-white/10 ${activeTab === 'volunteers' ? 'bg-[#C0392B]' : ''}`}>Data Relawan</button>
+          <button onClick={() => { setActiveTab('stock'); setSidebarOpen(false); }} className={`w-full text-left p-3 rounded hover:bg-white/10 ${activeTab === 'stock' ? 'bg-[#C0392B]' : ''}`}>Update Stok & Jadwal</button>
+          <button onClick={onLogout} className="w-full text-left p-3 rounded hover:bg-white/10 text-red-300 mt-10 flex items-center gap-2"><LogOut size={16}/> Logout</button>
+        </nav>
+      </aside>
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto h-screen">
         <div className="flex justify-between items-center mb-6 md:mb-8">
           <div className="flex items-center gap-3"><button onClick={() => setSidebarOpen(true)} className="md:hidden text-[#2C3E50]"><Menu size={24}/></button><h1 className="text-xl md:text-2xl font-bold text-[#2C3E50]">{activeTab === 'requests' ? 'Verifikasi Permohonan' : activeTab === 'volunteers' ? 'Manajemen Relawan' : 'Update Stok & Jadwal'}</h1></div>
           <button onClick={onLogout} className="md:hidden text-red-500"><LogOut/></button>
