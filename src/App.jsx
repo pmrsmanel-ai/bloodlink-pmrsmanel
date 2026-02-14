@@ -18,35 +18,31 @@ import {
   Edit3, 
   Trash2, 
   Save, 
-  Users,
-  ChevronRight,
-  PlusCircle,
-  User,
-  Info,
-  Loader,
-  RefreshCw,
-  Facebook,
-  Instagram,
-  Youtube,
+  Users, 
+  ChevronRight, 
+  PlusCircle, 
+  User, 
+  Info, 
+  Loader, 
+  RefreshCw, 
+  Facebook, 
+  Instagram, 
+  Youtube, 
   Video, 
-  MessageCircle,
-  Clock,
-  Share2,
-  AlertTriangle,
-  ArrowLeft,
-  Camera,
-  Download,
-  Globe
+  MessageCircle, 
+  Clock, 
+  Share2, 
+  AlertTriangle, 
+  ArrowLeft, 
+  Camera, 
+  Download, 
+  Globe 
 } from 'lucide-react';
-
-// PERLU DIINSTALL: npm install html2canvas
-// import html2canvas from 'html2canvas'; // Hapus ini agar tidak error di preview jika belum install
 
 // --- KONFIGURASI DATABASE ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
 
 // --- KOMPONEN UI TAMBAHAN ---
-
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 3000);
@@ -78,7 +74,7 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, isLoading }
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-500 mb-4">
             <AlertTriangle size={32} />
           </div>
-          <h3 className="text-xl font-black text-[#2C3E50] mb-2">{title}</h3>
+          <h3 className="text-xl font-bold text-[#2C3E50] mb-2">{title}</h3>
           <p className="text-gray-500 text-sm mb-6">{message}</p>
           <div className="flex gap-3 w-full">
             <button onClick={onCancel} disabled={isLoading} className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold text-sm hover:bg-gray-200 transition-colors">Batal</button>
@@ -92,13 +88,12 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, isLoading }
   );
 };
 
-// --- KOMPONEN POSTER INSTAGRAM (UPDATED FIX) ---
+// --- KOMPONEN POSTER INSTAGRAM ---
 const IGPosterModal = ({ patient, onClose }) => {
   const posterRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
   const [isLibLoaded, setIsLibLoaded] = useState(false);
 
-  // LOAD HTML2CANVAS DARI CDN SECARA OTOMATIS
   useEffect(() => {
     if (window.html2canvas) {
       setIsLibLoaded(true);
@@ -121,16 +116,15 @@ const IGPosterModal = ({ patient, onClose }) => {
     setDownloading(true);
 
     try {
-      // Scroll ke atas agar capture tidak terpotong
       window.scrollTo(0, 0); 
       await new Promise((resolve) => setTimeout(resolve, 800));
 
       const canvas = await window.html2canvas(posterRef.current, {
-        scale: 3, // Kualitas HD Tinggi
+        scale: 3, 
         useCORS: true, 
         backgroundColor: null,
         scrollX: 0,
-        scrollY: 0, // PENTING: Mencegah offset karena scroll
+        scrollY: 0, 
         x: 0,
         y: 0
       });
@@ -138,7 +132,7 @@ const IGPosterModal = ({ patient, onClose }) => {
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.href = image;
-      link.download = `BloodLink-Poster-${patient.patient.replace(/\s+/g, '-')}.png`;
+      link.download = `BloodLink-${patient.patient.replace(/\s+/g, '-')}.png`;
       link.click();
     } catch (error) {
       console.error("Gagal download poster:", error);
@@ -149,114 +143,97 @@ const IGPosterModal = ({ patient, onClose }) => {
   };
 
   return (
-    // Z-Index sangat tinggi agar tidak tertutup header, tambahkan pt-10 untuk spacing atas
-    <div className="fixed inset-0 z-[99999] flex items-start justify-center bg-black/95 backdrop-blur-md p-4 pt-10 animate-fadeIn overflow-y-auto">
-      <div className="relative w-full max-w-sm flex flex-col items-center">
-        
-        {/* Tombol Tutup */}
+    <div className="fixed inset-0 z-[99999] flex items-start justify-center bg-black/90 backdrop-blur-sm p-4 pt-10 animate-fadeIn overflow-y-auto">
+      <div className="relative w-full max-w-[340px] flex flex-col items-center">
         <button 
           onClick={onClose} 
-          className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full mb-6 flex items-center gap-2 font-bold backdrop-blur-sm transition-all"
+          className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full mb-4 flex items-center gap-2 font-bold backdrop-blur-sm transition-all text-sm"
         >
-          <X size={20} /> Tutup
+          <X size={18} /> Tutup
         </button>
 
-        {/* AREA POSTER (FIXED WIDTH UNTUK HASIL KONSTAN) */}
-        <div ref={posterRef} className="w-[360px] flex-shrink-0 bg-gradient-to-br from-red-600 to-red-900 p-6 rounded-[2.5rem] shadow-2xl text-white relative overflow-hidden border-[8px] border-white box-border">
-          {/* Dekorasi Background - Posisi Absolut Statis agar tidak bergeser */}
-          <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-black/20 rounded-full blur-3xl pointer-events-none"></div>
+        {/* AREA POSTER */}
+        <div ref={posterRef} className="w-[320px] bg-gradient-to-b from-red-600 to-red-800 p-5 rounded-[2rem] shadow-2xl text-white relative overflow-hidden box-border border-4 border-white/20">
           
-          {/* Header Poster */}
-          <div className="relative z-10 flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-white text-red-600 p-2.5 rounded-2xl shadow-lg">
-                <Droplet size={24} fill="currentColor" />
+          {/* Header */}
+          <div className="relative z-10 flex justify-between items-center mb-5">
+            <div className="flex items-center gap-2">
+              <div className="bg-white/90 text-red-600 p-1.5 rounded-lg shadow-sm">
+                <Droplet size={20} fill="currentColor" />
               </div>
-              <div>
-                <h3 className="font-black text-xl leading-none tracking-tight">URGENT</h3>
-                <p className="text-[10px] opacity-90 font-bold uppercase tracking-[0.2em] mt-1">Butuh Donor Darah</p>
+              <div className="flex flex-col">
+                <span className="font-bold text-base leading-none tracking-tight">URGENT</span>
+                <span className="text-[9px] font-medium opacity-90 tracking-wider">BUTUH DONOR</span>
               </div>
             </div>
-            <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/20">
-              PMR SMANEL
+            <div className="bg-white/20 px-3 py-1 rounded-full border border-white/10">
+              <span className="text-[9px] font-bold tracking-widest">PMR SMANEL</span>
             </div>
           </div>
 
-          {/* Konten Utama */}
-          <div className="relative z-10 bg-white text-[#2C3E50] rounded-[2rem] p-6 shadow-2xl mb-6">
-            <div className="text-center mb-8 border-b border-gray-100 pb-8">
-              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-6">Golongan Darah</p>
-              
-              {/* Flex container dengan margin bottom yang lebih besar untuk mencegah overlap */}
-              <div className="flex items-center justify-center gap-2 mb-8"> 
-                <span className="text-8xl font-black text-red-600 tracking-tighter leading-none">{patient.bloodType}</span>
-                {/* Rhesus */}
-                <span className="text-5xl font-black text-gray-300 leading-none self-center">{safeText(patient.rhesus)}</span>
+          {/* Card Putih */}
+          <div className="relative z-10 bg-white text-gray-800 rounded-[1.5rem] p-5 shadow-lg mb-5">
+            
+            {/* Golongan Darah */}
+            <div className="text-center mb-5 border-b border-gray-100 pb-5">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Golongan Darah</p>
+              <div className="flex items-center justify-center gap-1 mb-3"> 
+                <span className="text-7xl font-bold text-red-600 tracking-tighter leading-none">{patient.bloodType}</span>
+                <span className="text-4xl font-bold text-gray-400 leading-none self-center">{safeText(patient.rhesus)}</span>
               </div>
-              
-              <div className="inline-block bg-red-50 text-red-600 px-5 py-2.5 rounded-full text-sm font-black uppercase tracking-widest border border-red-100 shadow-sm">
+              <div className="inline-block bg-red-50 text-red-600 px-4 py-1.5 rounded-full text-xs font-bold border border-red-100 shadow-sm">
                 Butuh {patient.amount} Kantong
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="bg-gray-50 p-3 rounded-full text-red-500"><User size={20} /></div>
-                <div>
-                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Pasien</p>
-                  <p className="font-bold text-lg leading-tight text-gray-800">{patient.patient}</p>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">{patient.age ? `${patient.age} Tahun` : ''}</p>
+            {/* Detail Pasien */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-red-500 shrink-0"><User size={16} /></div>
+                <div className="overflow-hidden">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Pasien</p>
+                  <p className="font-bold text-sm truncate">{patient.patient}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-4">
-                <div className="bg-gray-50 p-3 rounded-full text-red-500"><MapPin size={20} /></div>
-                <div>
-                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Lokasi / RS</p>
-                  <p className="font-bold text-lg leading-tight text-gray-800">{patient.hospital}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-red-500 shrink-0"><MapPin size={16} /></div>
+                <div className="overflow-hidden">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Lokasi</p>
+                  <p className="font-bold text-sm leading-tight line-clamp-2">{patient.hospital}</p>
                 </div>
               </div>
-              <div className="flex items-start gap-4">
-                <div className="bg-gray-50 p-3 rounded-full text-red-500"><Phone size={20} /></div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-red-500 shrink-0"><Phone size={16} /></div>
                 <div>
-                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Hubungi Keluarga</p>
-                  <p className="font-bold text-xl leading-tight text-gray-800">{patient.contact}</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Hubungi Keluarga</p>
+                  <p className="font-bold text-lg text-gray-800 tracking-wide">{patient.contact}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Footer Poster */}
-          <div className="relative z-10 text-center flex flex-col items-center w-full px-1">
-            <p className="text-xs font-bold text-white/90 mb-4 italic">"Setetes darah Anda, nyawa bagi sesama."</p>
-            
-            <div className="w-full flex flex-col gap-3">
-                {/* Instagram */}
-                <div className="bg-black/30 backdrop-blur-sm rounded-xl p-2.5 flex items-center justify-center gap-3 border border-white/10 w-full">
-                  <Instagram size={18} />
-                  <span className="text-xs font-black tracking-wide">@pmr_smanel</span>
+          {/* Footer */}
+          <div className="relative z-10 text-center">
+            <p className="text-[10px] text-white/80 italic mb-3">"Setetes darah Anda, nyawa bagi sesama."</p>
+            <div className="flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2 bg-black/20 px-3 py-1.5 rounded-full">
+                   <Instagram size={14} />
+                   <span className="text-[10px] font-bold">@pmr_smanel</span>
                 </div>
-                
-                {/* Website Link - Tampil Jelas */}
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-2.5 flex items-center justify-center gap-3 border border-white/20 w-full shadow-lg">
-                    <Globe size={18} className="text-red-600" />
-                    <p className="text-xs font-black tracking-widest text-red-700">bloodlink.pmrsmanel.my.id</p>
+                <div className="flex items-center gap-2 bg-white text-red-700 px-3 py-1.5 rounded-full shadow-md">
+                   <Globe size={14} />
+                   <span className="text-[10px] font-bold tracking-wide">bloodlink.pmrsmanel.my.id</span>
                 </div>
             </div>
           </div>
         </div>
 
-        {/* Tombol Download */}
         <button 
           onClick={handleDownload}
           disabled={downloading || !isLibLoaded}
-          className="mt-8 mb-12 w-full py-4 bg-white text-red-600 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          className="mt-6 w-full py-3.5 bg-white text-red-600 rounded-xl font-bold text-sm uppercase tracking-wider shadow-lg hover:bg-gray-50 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          {downloading ? (
-            <><Loader size={18} className="animate-spin" /> Memproses...</>
-          ) : (
-            <><Download size={18} /> Simpan Poster</>
-          )}
+          {downloading ? <><Loader size={16} className="animate-spin" /> Memproses...</> : <><Download size={16} /> Simpan Gambar</>}
         </button>
       </div>
     </div>
@@ -265,92 +242,34 @@ const IGPosterModal = ({ patient, onClose }) => {
 
 // --- DATA FALLBACK ---
 const FALLBACK_DATA = {
-  bloodStock: {
-    A: { positive: 0, negative: 0 },
-    B: { positive: 0, negative: 0 },
-    AB: { positive: 0, negative: 0 },
-    O: { positive: 0, negative: 0 },
-  },
-  pmiStock: [
-    { id: 1, product: 'Whole Blood (WB)', A: 0, B: 0, O: 0, AB: 0, total: 0, lastUpdate: '-' },
-    { id: 2, product: 'Packed Red Cell (PRC)', A: 0, B: 0, O: 0, AB: 0, total: 0, lastUpdate: '-' },
-    { id: 3, product: 'Thrombocyte Conc. (TC)', A: 0, B: 0, O: 0, AB: 0, total: 0, lastUpdate: '-' },
-  ],
+  bloodStock: { A: { positive: 0, negative: 0 }, B: { positive: 0, negative: 0 }, AB: { positive: 0, negative: 0 }, O: { positive: 0, negative: 0 } },
+  pmiStock: [],
   mobileUnit: [],
   volunteers: [],
   requests: []
 };
 
-// --- DATA ARTIKEL EDUKASI (FORMAT LIST) ---
+// --- ARTIKEL ---
 const ARTICLES = [
-  {
-    id: 1,
-    title: "Syarat Menjadi Pendonor Darah",
-    excerpt: "Ketahui syarat fisik dan kesehatan sebelum Anda mendonorkan darah.",
-    content: [
-      "Sehat jasmani dan rohani.",
-      "Usia 17-60 tahun (usia 17 tahun diperbolehkan dengan izin tertulis orang tua).",
-      "Berat badan minimal 45 kg.",
-      "Temperatur tubuh 36,6 - 37,5 derajat Celcius.",
-      "Tekanan darah normal (Sistole 100-160 mmHg, Diastole 70-100 mmHg).",
-      "Denyut nadi teratur sekitar 50-100 kali/menit.",
-      "Kadar hemoglobin perempuan minimal 12 g/dL, laki-laki minimal 12,5 g/dL.",
-      "Tidak sedang sakit (flu, demam, dll) atau minum obat antibiotik.",
-      "Tidur cukup minimal 5 jam sebelum donor."
-    ],
-    image: "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=500"
-  },
-  {
-    id: 2,
-    title: "Mitos vs Fakta Donor Darah",
-    excerpt: "Donor darah bikin gemuk? Simak faktanya di sini.",
-    content: [
-      "❌ Mitos: Donor darah bikin gemuk.\n✅ Fakta: Donor darah justru membakar kalori (sekitar 650 kkal per kantong).",
-      "❌ Mitos: Donor darah menyakitkan.\n✅ Fakta: Rasa sakit hanya seperti gigitan semut saat jarum masuk, setelah itu tidak terasa.",
-      "❌ Mitos: Donor darah bikin lemas.\n✅ Fakta: Setelah donor, tubuh segera memproduksi sel darah baru yang membuat tubuh lebih segar.",
-      "❌ Mitos: Orang bertato tidak boleh donor.\n✅ Fakta: Boleh, asalkan tato sudah lebih dari 1 tahun (untuk memastikan bebas infeksi)."
-    ],
-    image: "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=500"
-  },
-  {
-    id: 3,
-    title: "Manfaat Donor Bagi Kesehatan",
-    excerpt: "Selain menolong orang lain, tubuh Anda juga menjadi lebih sehat.",
-    content: [
-      "Menurunkan risiko penyakit jantung dan penyumbatan pembuluh darah.",
-      "Mengurangi kekentalan darah secara alami.",
-      "Menstimulasi produksi sel darah merah baru yang lebih segar.",
-      "Mendapatkan pemeriksaan kesehatan gratis (Sifilis, HIV, Hepatitis B & C).",
-      "Menjaga kadar zat besi dalam darah agar tetap stabil.",
-      "Membantu kesehatan mental karena perasaan bahagia telah menolong sesama."
-    ],
-    image: "https://images.unsplash.com/photo-1584362917165-526a968579e8?auto=format&fit=crop&q=80&w=500"
-  }
+  { id: 1, title: "Syarat Menjadi Pendonor Darah", excerpt: "Ketahui syarat fisik sebelum donor.", content: ["Sehat jasmani dan rohani.", "Usia 17-60 tahun.", "Berat badan minimal 45 kg.", "Tidak sedang sakit."], image: "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=500" },
+  { id: 2, title: "Mitos vs Fakta Donor Darah", excerpt: "Simak faktanya di sini.", content: ["❌ Mitos: Donor darah bikin gemuk.", "✅ Fakta: Justru membakar kalori.", "❌ Mitos: Menyakitkan.", "✅ Fakta: Hanya seperti gigitan semut."], image: "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=500" },
+  { id: 3, title: "Manfaat Donor Bagi Kesehatan", excerpt: "Tubuh menjadi lebih sehat.", content: ["Menurunkan risiko penyakit jantung.", "Mengurangi kekentalan darah.", "Pemeriksaan kesehatan gratis."], image: "https://images.unsplash.com/photo-1584362917165-526a968579e8?auto=format&fit=crop&q=80&w=500" }
 ];
 
 // --- HELPER FUNCTIONS ---
 const sendDataToSheet = async (sheetName, data, action = 'write') => {
   if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("PASTE_URL")) return false;
   try {
-    await fetch(`${APPS_SCRIPT_URL}?action=${action}&sheet=${sheetName}`, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify(data)
-    });
+    await fetch(`${APPS_SCRIPT_URL}?action=${action}&sheet=${sheetName}`, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
     return true;
-  } catch (e) {
-    console.error(`Gagal kirim ke ${sheetName}:`, e);
-    return false;
-  }
+  } catch (e) { console.error(e); return false; }
 };
 
 const formatDateIndo = (dateString) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return dateString; 
-  return new Intl.DateTimeFormat('id-ID', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-  }).format(date);
+  return new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
 };
 
 const getWALink = (phone, text = "") => {
@@ -367,48 +286,29 @@ const safeText = (text) => {
 };
 
 const calculateEligibility = (lastDate) => {
-  if (!lastDate || String(lastDate).trim() === "" || String(lastDate).includes("ERROR")) {
-    return { eligible: true, text: "BISA DONOR", color: "bg-green-100 text-green-700" };
-  }
+  if (!lastDate || String(lastDate).trim() === "") return { eligible: true, text: "BISA DONOR", color: "bg-green-100 text-green-700" };
   const last = new Date(lastDate);
   if (isNaN(last.getTime())) return { eligible: true, text: "BISA DONOR", color: "bg-green-100 text-green-700" };
-  const today = new Date();
-  const diffTime = Math.abs(today - last);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  const MIN_DAYS = 90;
-  if (diffDays >= MIN_DAYS) return { eligible: true, text: "BISA DONOR", color: "bg-green-100 text-green-700" };
-  const remaining = MIN_DAYS - diffDays;
-  return { eligible: false, text: `Tunggu ${remaining} hari lagi`, color: "bg-gray-100 text-gray-500" };
+  const diffDays = Math.ceil(Math.abs(new Date() - last) / (1000 * 60 * 60 * 24));
+  return diffDays >= 90 ? { eligible: true, text: "BISA DONOR", color: "bg-green-100 text-green-700" } : { eligible: false, text: `Tunggu ${90 - diffDays} hari lagi`, color: "bg-gray-100 text-gray-500" };
 };
 
 // --- COMPONENTS ---
-
 const Navbar = ({ setView, view, isLoggedIn }) => {
   const [isOpen, setIsOpen] = useState(false);
   const navItems = [
-    { label: 'Home', value: 'home' },
-    { label: 'Butuh Donor', value: 'patient_list' },
-    { label: 'Data Relawan', value: 'volunteer_list' },
-    { label: 'Stok Darah', value: 'stock' },
-    { label: 'Edukasi', value: 'education' },
+    { label: 'Home', value: 'home' }, { label: 'Butuh Donor', value: 'patient_list' }, { label: 'Data Relawan', value: 'volunteer_list' }, { label: 'Stok Darah', value: 'stock' }, { label: 'Edukasi', value: 'education' }
   ];
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-md font-sans">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center cursor-pointer" onClick={() => setView('home')}>
-            <div className="h-10 w-10 bg-[#C0392B] rounded-lg flex items-center justify-center text-white mr-3 shadow-sm">
-              <Droplet fill="currentColor" size={24} />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-[#C0392B]">BloodL!nk</h1>
-              <p className="text-xs text-black font-bold tracking-wider">PMR SMANEL</p>
-            </div>
+            <div className="h-10 w-10 bg-[#C0392B] rounded-lg flex items-center justify-center text-white mr-3 shadow-sm"><Droplet fill="currentColor" size={24} /></div>
+            <div><h1 className="text-xl font-extrabold text-[#C0392B]">BloodL!nk</h1><p className="text-xs text-black font-bold tracking-wider">PMR SMANEL</p></div>
           </div>
           <div className="hidden md:flex items-center space-x-6">
-            {navItems.map((item) => (
-              <button key={item.value} onClick={() => setView(item.value)} className={`font-medium transition-colors duration-200 ${view === item.value ? 'text-[#C0392B]' : 'text-[#2C3E50] hover:text-[#C0392B]'}`}>{item.label}</button>
-            ))}
+            {navItems.map((item) => (<button key={item.value} onClick={() => setView(item.value)} className={`font-medium transition-colors ${view === item.value ? 'text-[#C0392B]' : 'text-[#2C3E50] hover:text-[#C0392B]'}`}>{item.label}</button>))}
             <button onClick={() => setView(isLoggedIn ? 'admin' : 'login')} className="px-4 py-2 rounded-full border border-[#2C3E50] text-[#2C3E50] hover:bg-[#2C3E50] hover:text-white transition-all text-sm font-semibold">{isLoggedIn ? 'Dashboard' : 'Login Admin'}</button>
           </div>
           <div className="md:hidden"><button onClick={() => setIsOpen(!isOpen)} className="text-[#2C3E50]">{isOpen ? <X size={28} /> : <Menu size={28} />}</button></div>
@@ -417,9 +317,7 @@ const Navbar = ({ setView, view, isLoggedIn }) => {
       {isOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 absolute w-full shadow-lg">
           <div className="flex flex-col p-4 space-y-4">
-            {navItems.map((item) => (
-              <button key={item.value} onClick={() => { setView(item.value); setIsOpen(false); }} className="text-left font-medium py-2 text-[#2C3E50]">{item.label}</button>
-            ))}
+            {navItems.map((item) => (<button key={item.value} onClick={() => { setView(item.value); setIsOpen(false); }} className="text-left font-medium py-2 text-[#2C3E50]">{item.label}</button>))}
             <button onClick={() => { setView(isLoggedIn ? 'admin' : 'login'); setIsOpen(false); }} className="text-left font-medium py-2 text-gray-600">{isLoggedIn ? 'Dashboard Admin' : 'Login Admin'}</button>
           </div>
         </div>
@@ -430,12 +328,10 @@ const Navbar = ({ setView, view, isLoggedIn }) => {
 
 const Hero = ({ setView }) => (
   <header className="bg-gradient-to-br from-gray-50 to-gray-100 py-16 md:py-24 relative overflow-hidden">
-    <div className="absolute top-0 right-0 w-64 h-64 bg-red-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-    <div className="absolute top-0 left-0 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
     <div className="container mx-auto px-4 relative z-10 text-center">
       <div className="inline-block px-4 py-1 mb-6 rounded-full bg-red-100 text-[#C0392B] text-sm font-semibold tracking-wide">BLOODLINK PMR SMANEL</div>
-      <h1 className="text-4xl md:text-6xl font-bold text-[#2C3E50] mb-6 leading-tight">Karena Setiap Tetes <br/> <span className="text-[#C0392B]">Sangat Berarti.</span></h1>
-      <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">Selamat datang di <strong>BloodL!nk PmrSmanel</strong>, inisiatif digital Palang Merah Remaja Unit SMAN 1 AIKMEL untuk menjembatani kebutuhan darah masyarakat.</p>
+      <h1 className="text-4xl md:text-6xl font-bold text-[#2C3E50] mb-6">Karena Setiap Tetes <br/> <span className="text-[#C0392B]">Sangat Berarti.</span></h1>
+      <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">Selamat datang di BloodL!nk PmrSmanel, jembatan kemanusiaan digital SMAN 1 AIKMEL.</p>
       <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
         <button onClick={() => setView('patient_list')} className="w-full md:w-auto px-8 py-4 bg-[#C0392B] text-white rounded-lg shadow-lg hover:bg-red-700 font-bold flex items-center justify-center gap-2 text-lg"><Search size={20} /> Lihat Pasien Butuh Darah</button>
         <button onClick={() => setView('register')} className="w-full md:w-auto px-8 py-4 bg-white text-[#2C3E50] border-2 border-[#2C3E50] rounded-lg shadow-md hover:bg-gray-50 font-bold flex items-center justify-center gap-2 text-lg"><UserPlus size={20} /> Saya Ingin Donor Darah</button>
@@ -445,48 +341,22 @@ const Hero = ({ setView }) => (
 );
 
 const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
-  const lastUpdateRaw = pmiStock.length > 0 ? pmiStock[0].lastUpdate : null;
-  const displayLastUpdate = lastUpdateRaw && lastUpdateRaw !== '-' ? lastUpdateRaw : new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const totalVolunteers = Object.values(bloodStock).reduce((acc, curr) => acc + curr.positive + curr.negative, 0);
-
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12"><h2 className="text-3xl font-bold text-[#2C3E50] mb-2">Stok Darah & Jadwal</h2><div className="h-1 w-20 bg-[#C0392B] mx-auto"></div></div>
+        <div className="text-center mb-12"><h2 className="text-3xl font-bold text-[#2C3E50]">Stok Darah & Jadwal</h2><div className="h-1 w-20 bg-[#C0392B] mx-auto mt-2"></div></div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div className="bg-gray-50 p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-xl font-bold text-[#2C3E50] mb-6 flex items-center justify-between"><span className="flex items-center gap-2"><Droplet className="text-[#C0392B]" /> Relawan Siap Donor</span><span className="text-sm bg-red-100 text-[#C0392B] py-1 px-3 rounded-full">Total: {totalVolunteers}</span></h3>
-            <div className="grid grid-cols-2 gap-4">
-              {Object.entries(bloodStock).map(([type, data]) => (
-                <div key={type} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
-                  <div className="absolute right-0 top-0 h-full w-2 bg-[#C0392B]"></div>
-                  <div className="flex justify-between items-start">
-                    <div><span className="text-3xl font-black text-[#2C3E50]">{type}</span><div className="text-xs text-gray-500 mt-1">Golongan</div></div>
-                    <div className="text-right"><div className="text-sm font-semibold text-gray-600">Total: <span className="text-[#C0392B] text-lg">{data.positive + data.negative}</span></div><div className="text-xs text-gray-400">Rh+: {data.positive} | Rh-: {data.negative}</div></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 text-xs text-gray-400 text-center italic">*Otomatis dari jumlah relawan terdaftar</div>
+            <h3 className="text-xl font-bold text-[#2C3E50] mb-6 flex justify-between"><span>Relawan Sekolah</span><span className="text-sm bg-red-100 text-[#C0392B] py-1 px-3 rounded-full">Total: {totalVolunteers}</span></h3>
+            <div className="grid grid-cols-2 gap-4">{Object.entries(bloodStock).map(([type, data]) => (<div key={type} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 relative"><div className="absolute right-0 top-0 h-full w-2 bg-[#C0392B]"></div><div className="flex justify-between"><div><span className="text-3xl font-black text-[#2C3E50]">{type}</span></div><div className="text-right"><div className="text-lg font-bold text-[#C0392B]">{data.positive + data.negative}</div><div className="text-xs text-gray-400">Rh+: {data.positive} | Rh-: {data.negative}</div></div></div></div>))}</div>
           </div>
           <div className="space-y-6">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-              <div className="mb-4"><h3 className="text-xl font-bold text-[#2C3E50] flex items-center gap-2"><Activity className="text-[#C0392B]" /> Stok Darah PMI Kab. Lombok Timur</h3><p className="text-xs text-gray-500 ml-8 mt-1">Update Terakhir: {displayLastUpdate}</p></div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left"><thead className="bg-[#2C3E50] text-white"><tr><th className="px-4 py-3 rounded-tl-lg">Produk</th><th className="px-4 py-3 text-center">A</th><th className="px-4 py-3 text-center">B</th><th className="px-4 py-3 text-center">O</th><th className="px-4 py-3 text-center">AB</th><th className="px-4 py-3 text-center rounded-tr-lg">Total</th></tr></thead>
-                  <tbody>{pmiStock.length > 0 ? pmiStock.map((row, idx) => {
-                      const total = (parseInt(row.A) || 0) + (parseInt(row.B) || 0) + (parseInt(row.O) || 0) + (parseInt(row.AB) || 0);
-                      return (<tr key={idx} className="border-b hover:bg-red-50 transition-colors"><td className="px-4 py-3 font-medium text-gray-700">{row.product}</td><td className="px-4 py-3 text-center text-gray-600">{row.A}</td><td className="px-4 py-3 text-center text-gray-600">{row.B}</td><td className="px-4 py-3 text-center text-gray-600">{row.O}</td><td className="px-4 py-3 text-center text-gray-600">{row.AB}</td><td className="px-4 py-3 text-center font-bold text-[#C0392B]">{total}</td></tr>);
-                    }) : <tr><td colSpan="6" className="p-4 text-center">Data PMI sedang dimuat...</td></tr>}</tbody>
-                </table>
-              </div>
+              <h3 className="text-xl font-bold text-[#2C3E50] mb-4 flex gap-2"><Activity className="text-[#C0392B]" /> Stok PMI Lotim</h3>
+              <div className="overflow-x-auto"><table className="w-full text-sm text-left"><thead className="bg-[#2C3E50] text-white"><tr><th className="px-4 py-3">Produk</th><th className="px-4 py-3 text-center">A</th><th className="px-4 py-3 text-center">B</th><th className="px-4 py-3 text-center">O</th><th className="px-4 py-3 text-center">AB</th><th className="px-4 py-3 text-center">Total</th></tr></thead><tbody>{pmiStock.length > 0 ? pmiStock.map((row, i) => (<tr key={i} className="border-b hover:bg-red-50"><td className="px-4 py-3 font-medium">{row.product}</td><td className="px-4 py-3 text-center">{row.A}</td><td className="px-4 py-3 text-center">{row.B}</td><td className="px-4 py-3 text-center">{row.O}</td><td className="px-4 py-3 text-center">{row.AB}</td><td className="px-4 py-3 text-center font-bold text-[#C0392B]">{(parseInt(row.A)||0)+(parseInt(row.B)||0)+(parseInt(row.O)||0)+(parseInt(row.AB)||0)}</td></tr>)) : <tr><td colSpan="6" className="p-4 text-center">Memuat...</td></tr>}</tbody></table></div>
             </div>
-            <div className="bg-[#2C3E50] p-6 rounded-2xl text-white">
-              <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><Calendar className="text-red-400" /> Jadwal Mobil Unit</h3>
-              <div className="space-y-4">{mobileUnit.length > 0 ? mobileUnit.map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-3 p-3 bg-white/10 rounded-lg backdrop-blur-sm"><MapPin className="text-red-400 mt-1 flex-shrink-0" size={18} /><div><p className="font-bold text-sm">{item.location}</p><p className="text-xs text-gray-300">{formatDateIndo(item.date)} • {item.time}</p></div></div>
-                )) : (<p className="text-gray-400 text-sm italic">Belum ada jadwal mobil unit.</p>)}</div>
-            </div>
+            <div className="bg-[#2C3E50] p-6 rounded-2xl text-white"><h3 className="text-xl font-bold mb-4 flex gap-2"><Calendar className="text-red-400" /> Jadwal Mobil Unit</h3><div className="space-y-4">{mobileUnit.length > 0 ? mobileUnit.map((item, i) => (<div key={i} className="flex gap-3 p-3 bg-white/10 rounded-lg"><MapPin size={18} className="text-red-400 mt-1"/><div><p className="font-bold text-sm">{item.location}</p><p className="text-xs text-gray-300">{formatDateIndo(item.date)} • {item.time}</p></div></div>)) : <p className="text-sm italic">Tidak ada jadwal aktif.</p>}</div></div>
           </div>
         </div>
       </div>
@@ -497,197 +367,104 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
 const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBlood, setFilterBlood] = useState('ALL');
-  const [posterData, setPosterData] = useState(null); // STATE UNTUK POSTER
+  const [posterData, setPosterData] = useState(null);
 
-  // Filter khusus jika dibuka via link share
   const activeRequests = requests.filter(req => {
-    // 1. Prioritas: Jika ada ID share, tampilkan HANYA itu
-    if (sharedId) {
-        return String(req.id) === String(sharedId);
-    }
-    // 2. Logika normal
+    if (sharedId) return String(req.id) === String(sharedId);
     const isSearching = req.status === 'Mencari';
     const matchesSearch = searchTerm === '' || req.patient.toLowerCase().includes(searchTerm.toLowerCase()) || req.hospital.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterBlood === 'ALL' || req.bloodType === filterBlood;
     return isSearching && matchesSearch && matchesFilter;
   });
 
-  // SORTING: Pasien Terbaru (ID Lebih Besar) Paling Atas
   const sortedRequests = [...activeRequests].sort((a, b) => b.id - a.id);
 
   const handleShare = async (req) => {
-    // URL SHARE MENGGUNAKAN ID UNIK
     const shareUrl = `${window.location.origin}?view=patient_list&id=${req.id}`;
-    const baseText = `🚨 *BUTUH DONOR DARAH SEGERA* 🚨\n\nPasien: *${req.patient}*\nGolongan: *${req.bloodType}${safeText(req.rhesus)}*\nKebutuhan: *${req.amount} Kantong*\nRS: *${req.hospital}*\n\nBantu share info ini! Klik link di bawah untuk detail & kontak:`;
-    
+    const baseText = `🚨 *BUTUH DONOR DARAH SEGERA* 🚨\n\nPasien: *${req.patient}*\nGolongan: *${req.bloodType}${safeText(req.rhesus)}*\nKebutuhan: *${req.amount} Kantong*\nRS: *${req.hospital}*\n\nBantu share info ini! Klik link:`;
     if (navigator.share) {
-      try { 
-        await navigator.share({ 
-          title: 'Butuh Donor Darah', 
-          text: baseText, 
-          url: shareUrl 
-        }); 
-      } catch (err) { console.log("Gagal share", err); }
+      try { await navigator.share({ title: 'Butuh Donor', text: baseText, url: shareUrl }); } catch (err) { console.log(err); }
     } else {
       navigator.clipboard.writeText(`${baseText}\n${shareUrl}`);
-      showToast('Pesan & Link disalin ke clipboard!', 'success');
+      showToast('Link disalin ke clipboard!', 'success');
     }
   };
 
   const clearSharedFilter = () => {
     setSharedId(null);
-    window.history.replaceState({}, document.title, window.location.pathname); // Bersihkan URL
+    window.history.replaceState({}, document.title, window.location.pathname);
   };
 
   return (
     <section className="py-16 bg-red-50 min-h-screen">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-[#C0392B] mb-2">Pasien Butuh Darah</h2>
-            <p className="text-gray-600">Daftar pasien yang mendesak membutuhkan bantuan donor.</p>
-        </div>
-
-        {/* JIKA MODE SHARE AKTIF */}
+        <div className="text-center mb-8"><h2 className="text-3xl font-bold text-[#C0392B]">Pasien Butuh Darah</h2></div>
         {sharedId ? (
-            <div className="mb-8 text-center animate-fadeIn">
-                <div className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold mb-4">
-                    <Info size={16} /> Menampilkan pasien spesifik dari tautan
-                </div>
-                <br/>
-                <button onClick={clearSharedFilter} className="inline-flex items-center gap-2 bg-white border border-gray-300 px-5 py-2 rounded-full text-gray-600 font-bold hover:bg-gray-50 transition-all text-sm">
-                    <ArrowLeft size={16}/> Lihat Semua Pasien
-                </button>
-            </div>
+          <div className="mb-8 text-center animate-fadeIn"><button onClick={clearSharedFilter} className="bg-white border px-5 py-2 rounded-full font-bold hover:bg-gray-50 flex items-center gap-2 mx-auto"><ArrowLeft size={16}/> Lihat Semua Pasien</button></div>
         ) : (
-            // JIKA MODE NORMAL (SEARCH & FILTER)
-            <div className="flex flex-col items-center gap-4 mb-8 animate-fadeIn">
-                <div className="relative w-full max-w-md">
-                    <input type="text" placeholder="Cari nama pasien atau rumah sakit..." className="w-full p-3 pl-10 rounded-full border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#C0392B]" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                    <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-                </div>
-                <div className="flex gap-2 flex-wrap justify-center">
-                    {['ALL', 'A', 'B', 'AB', 'O'].map(type => (
-                        <button key={type} onClick={() => setFilterBlood(type)} className={`px-4 py-2 rounded-full font-semibold transition-colors text-sm ${filterBlood === type ? 'bg-[#C0392B] text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>{type === 'ALL' ? 'Semua' : `${type}`}</button>
-                    ))}
-                </div>
-            </div>
+          <div className="flex flex-col items-center gap-4 mb-8">
+            <div className="relative w-full max-w-md"><input type="text" placeholder="Cari nama pasien..." className="w-full p-3 pl-10 rounded-full border shadow-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /><Search className="absolute left-3 top-3 text-gray-400" size={20} /></div>
+            <div className="flex gap-2 flex-wrap">{['ALL', 'A', 'B', 'AB', 'O'].map(type => (<button key={type} onClick={() => setFilterBlood(type)} className={`px-4 py-2 rounded-full font-semibold text-sm ${filterBlood === type ? 'bg-[#C0392B] text-white' : 'bg-white border'}`}>{type === 'ALL' ? 'Semua' : type}</button>))}</div>
+          </div>
         )}
-
-        {sortedRequests.length === 0 ? (
-          <div className="text-center py-10 bg-white rounded-xl shadow"><CheckCircle size={48} className="mx-auto text-green-500 mb-4" /><h3 className="text-xl font-bold text-gray-700">{sharedId ? "Data pasien tidak ditemukan / sudah terpenuhi." : "Tidak ada permintaan ditemukan."}</h3><p className="text-gray-500">{sharedId ? "Silakan lihat daftar pasien lainnya." : "Stok darah aman atau semua kebutuhan telah terpenuhi."}</p>{sharedId && <button onClick={clearSharedFilter} className="mt-4 text-[#C0392B] font-bold underline">Lihat Semua Daftar</button>}</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedRequests.map(req => (
-              <div key={req.id} className={`bg-white p-6 rounded-xl shadow-md border-l-4 border-[#C0392B] hover:-translate-y-1 transition-transform relative ${sharedId ? 'ring-4 ring-yellow-200 shadow-2xl scale-105' : ''}`}>
-                <div className="flex justify-between items-start mb-2">
-                  <div><h3 className="font-bold text-xl text-[#2C3E50]">{req.patient}</h3><div className="flex items-center text-xs text-gray-500 mt-1">{req.age ? `${req.age} Tahun • ` : ''} <MapPin size={12} className="mx-1" /> {req.hospital}</div></div>
-                  <div className="bg-red-100 text-[#C0392B] px-3 py-1 rounded-lg font-bold text-lg">{req.bloodType}{safeText(req.rhesus)}</div>
-                </div>
-                <div className="mb-4"><div className="bg-red-50 text-red-700 text-sm px-3 py-2 rounded-lg font-semibold flex items-center justify-between"><span>Dibutuhkan:</span><span className="font-bold text-lg">{req.amount || '?'} Kantong</span></div></div>
-                <div className="space-y-2 mb-6"><div className="text-sm bg-gray-50 p-2 rounded"><span className="font-semibold block text-xs text-gray-400">STATUS</span><span className="text-red-600 font-bold animate-pulse">URGENT / MENCARI</span></div><div className="text-sm bg-gray-50 p-2 rounded"><span className="font-semibold block text-xs text-gray-400">KONTAK (HP)</span><div className="flex items-center gap-2 font-medium"><Phone size={14} /> {safeText(req.contact)}</div></div></div>
+              <div key={req.id} className={`bg-white p-6 rounded-xl shadow-md border-l-4 border-[#C0392B] relative ${sharedId ? 'ring-4 ring-yellow-200 shadow-2xl scale-105' : ''}`}>
+                <div className="flex justify-between mb-2"><div><h3 className="font-bold text-xl text-[#2C3E50]">{req.patient}</h3><div className="text-xs text-gray-500 flex items-center gap-1"><MapPin size={12}/> {req.hospital}</div></div><div className="bg-red-100 text-[#C0392B] px-3 py-1 rounded-lg font-bold text-lg">{req.bloodType}{safeText(req.rhesus)}</div></div>
+                <div className="bg-red-50 text-red-700 px-3 py-2 rounded-lg font-bold text-sm mb-4 flex justify-between"><span>Butuh:</span><span>{req.amount} Kantong</span></div>
                 <div className="grid grid-cols-5 gap-2">
-                    <a href={getWALink(req.contact, `Halo, saya melihat info dari BloodLink PMR SMANEL bahwa pasien a.n ${req.patient} (${req.age ? req.age + ' th' : ''}) membutuhkan donor darah ${req.bloodType}${safeText(req.rhesus)} sebanyak ${req.amount || '?'} kantong di ${req.hospital}. Apakah masih membutuhkan?`)} target="_blank" rel="noreferrer" className="col-span-3 bg-[#25D366] text-white py-2 rounded-lg font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"><MessageCircle size={18} /> Chat</a>
-                    <button onClick={() => handleShare(req)} className="col-span-1 bg-blue-500 text-white rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors shadow-sm"><Share2 size={20} /></button>
-                    {/* BUTTON POSTER IG */}
-                    <button onClick={() => setPosterData(req)} className="col-span-1 bg-purple-500 text-white rounded-lg flex items-center justify-center hover:bg-purple-600 transition-colors shadow-sm" title="Buat Poster IG"><Instagram size={20} /></button>
-
-                    {req.contact2 && (
-                      <a href={getWALink(req.contact2, `Halo, saya melihat info dari BloodLink PMR SMANEL bahwa pasien a.n ${req.patient} membutuhkan donor darah. Saya menghubungi nomor alternatif ini karena nomor utama sulit dihubungi.`)} target="_blank" rel="noreferrer" className="col-span-5 bg-teal-500 text-white py-2 rounded-lg font-bold hover:bg-teal-600 transition-colors flex items-center justify-center gap-2 text-sm"><MessageCircle size={18} /> Hubungi Alternatif (Kel. Lain)</a>
-                    )}
+                    <a href={getWALink(req.contact, `Halo, saya ingin membantu donor untuk pasien ${req.patient}.`)} target="_blank" rel="noreferrer" className="col-span-3 bg-[#25D366] text-white py-2 rounded-lg font-bold flex justify-center gap-2 text-sm"><MessageCircle size={18} /> Chat</a>
+                    <button onClick={() => handleShare(req)} className="col-span-1 bg-blue-500 text-white rounded-lg flex justify-center items-center"><Share2 size={20}/></button>
+                    <button onClick={() => setPosterData(req)} className="col-span-1 bg-purple-500 text-white rounded-lg flex justify-center items-center"><Instagram size={20}/></button>
                 </div>
               </div>
             ))}
-          </div>
-        )}
-        <div className="mt-12 text-center"><p className="mb-4 text-gray-600">Anda atau kerabat butuh darah?</p><button onClick={() => setView('search')} className="px-6 py-3 bg-[#2C3E50] text-white rounded-full font-bold shadow hover:bg-gray-700 transition-colors">Ajukan Permohonan Darah</button></div>
+        </div>
       </div>
-      
-      {/* MODAL POSTER IG */}
       {posterData && <IGPosterModal patient={posterData} onClose={() => setPosterData(null)} />}
     </section>
   );
 };
 
-// 5. VOLUNTEER LIST
 const VolunteerList = ({ volunteers, setView }) => {
   const [filterBloodType, setFilterBloodType] = useState('ALL');
-  const [showOnlyReady, setShowOnlyReady] = useState(false); // FILTER BARU
-
+  const [showOnlyReady, setShowOnlyReady] = useState(false);
   const activeVolunteers = volunteers.filter(vol => {
     const isActive = vol.status === 'Aktif';
-    const matchesBloodType = filterBloodType === 'ALL' || vol.bloodType === filterBloodType;
-    
-    // Logika Filter Siap Donor
-    const eligibility = calculateEligibility(vol.lastDonorDate);
-    const matchesReady = showOnlyReady ? eligibility.eligible : true;
-
-    return isActive && matchesBloodType && matchesReady;
+    const matchesBlood = filterBloodType === 'ALL' || vol.bloodType === filterBloodType;
+    const matchesReady = showOnlyReady ? calculateEligibility(vol.lastDonorDate).eligible : true;
+    return isActive && matchesBlood && matchesReady;
   });
-  
   return (
     <section className="py-16 bg-blue-50 min-h-screen">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8"><h2 className="text-3xl font-bold text-[#2C3E50] mb-2">Relawan Siap Donor</h2><p className="text-gray-600">Pahlawan kemanusiaan yang siap berbagi kehidupan.</p></div>
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
-            <div className="flex gap-2 flex-wrap justify-center">
-                {['ALL', 'A', 'B', 'AB', 'O'].map(type => (
-                    <button key={type} onClick={() => setFilterBloodType(type)} className={`px-4 py-2 rounded-full font-semibold transition-colors text-sm ${filterBloodType === type ? 'bg-[#C0392B] text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}>{type === 'ALL' ? 'Semua' : `${type}`}</button>
-                ))}
-            </div>
-            
-            {/* BUTTON FILTER SIAP DONOR */}
-            <button 
-                onClick={() => setShowOnlyReady(!showOnlyReady)}
-                className={`px-4 py-2 rounded-full font-semibold transition-colors text-sm flex items-center gap-2 ${showOnlyReady ? 'bg-green-600 text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'}`}
-            >
-                {showOnlyReady ? <CheckCircle size={16}/> : <Clock size={16}/>}
-                {showOnlyReady ? 'Hanya Siap Donor' : 'Semua Status'}
-            </button>
+        <div className="text-center mb-8"><h2 className="text-3xl font-bold text-[#2C3E50] mb-2">Relawan Siap Donor</h2></div>
+        <div className="flex flex-col md:flex-row justify-center gap-4 mb-8">
+            <div className="flex gap-2 flex-wrap justify-center">{['ALL', 'A', 'B', 'AB', 'O'].map(type => (<button key={type} onClick={() => setFilterBloodType(type)} className={`px-4 py-2 rounded-full font-semibold text-sm ${filterBloodType === type ? 'bg-[#C0392B] text-white' : 'bg-white border'}`}>{type === 'ALL' ? 'Semua' : type}</button>))}</div>
+            <button onClick={() => setShowOnlyReady(!showOnlyReady)} className={`px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2 ${showOnlyReady ? 'bg-green-600 text-white' : 'bg-white border'}`}>{showOnlyReady ? <CheckCircle size={16}/> : <Clock size={16}/>} Hanya Siap Donor</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {activeVolunteers.length > 0 ? activeVolunteers.map(vol => {
+          {activeVolunteers.map(vol => {
             const eligibility = calculateEligibility(vol.lastDonorDate);
             return (
-              <div key={vol.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-md transition-shadow relative">
+              <div key={vol.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-[#2C3E50]"><User size={40} /></div>
                 <h3 className="font-bold text-lg text-[#2C3E50]">{vol.name}</h3>
                 <div className={`mt-2 mb-4 px-3 py-1 rounded-full text-xs font-bold ${eligibility.color}`}>{eligibility.text}</div>
-                <div className="w-full border-t border-gray-100 pt-4 grid grid-cols-2 gap-2 text-sm mb-4">
-                  <div><div className="text-gray-400 text-xs">Golongan</div><div className="font-bold text-xl text-[#C0392B]">{vol.bloodType}</div></div>
-                  <div><div className="text-gray-400 text-xs">Rhesus</div><div className="font-bold text-xl text-[#2C3E50]">{safeText(vol.rhesus)}</div></div>
-                </div>
+                <div className="w-full border-t pt-4 grid grid-cols-2 gap-2 text-sm mb-4"><div>Golongan<br/><span className="text-xl font-bold text-[#C0392B]">{vol.bloodType}</span></div><div>Rhesus<br/><span className="text-xl font-bold text-[#2C3E50]">{safeText(vol.rhesus)}</span></div></div>
                 <div className="w-full space-y-2">
                     {eligibility.eligible ? (
                         <>
-                        <a 
-                            href={getWALink(vol.phone, `Halo Kak ${vol.name}, saya mendapatkan info dari BloodLink PMR SMANEL bahwa kakak terdaftar sebagai relawan donor darah. Apakah bersedia mendonorkan darah saat ini?`)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="w-full bg-[#25D366] text-white py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition-colors flex items-center justify-center gap-1"
-                        >
-                            <MessageCircle size={16} /> Hubungi Relawan
-                        </a>
-                        {/* KONTAK ORANG TUA / KE-2 */}
-                        {vol.phone2 && (
-                            <a 
-                                href={getWALink(vol.phone2, `Halo, saya dari BloodLink PMR SMANEL. Ingin menanyakan perihal izin donor darah untuk Kak ${vol.name}.`)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="w-full bg-blue-500 text-white py-2 rounded-lg font-bold text-sm hover:bg-blue-600 transition-colors flex items-center justify-center gap-1"
-                            >
-                                <MessageCircle size={16} /> Hubungi Ortu/Wali
-                            </a>
-                        )}
+                        <a href={getWALink(vol.phone, `Halo Kak ${vol.name}, dari BloodLink...`)} target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white py-2 rounded-lg font-bold text-sm flex justify-center gap-1"><MessageCircle size={16}/> Hubungi Relawan</a>
+                        {vol.phone2 && <a href={getWALink(vol.phone2, `Halo Ortu Kak ${vol.name}...`)} target="_blank" rel="noreferrer" className="w-full bg-blue-500 text-white py-2 rounded-lg font-bold text-sm flex justify-center gap-1"><MessageCircle size={16}/> Hubungi Ortu</a>}
                         </>
-                    ) : (
-                        <button disabled className="w-full bg-gray-200 text-gray-500 py-2 rounded-lg font-bold text-sm cursor-not-allowed flex items-center justify-center gap-1"><Clock size={16} /> Dalam Masa Tunggu</button>
-                    )}
+                    ) : <button disabled className="w-full bg-gray-200 text-gray-500 py-2 rounded-lg font-bold text-sm cursor-not-allowed"><Clock size={16}/> Masa Tunggu</button>}
                 </div>
               </div>
             );
-          }) : <div className="col-span-4 text-center text-gray-500 py-8">Tidak ada relawan yang sesuai filter.</div>}
+          })}
         </div>
-        <div className="mt-12 text-center"><p className="mb-4 text-gray-600">Ingin bergabung menjadi relawan?</p><button onClick={() => setView('register')} className="px-6 py-3 bg-[#C0392B] text-white rounded-full font-bold shadow hover:bg-red-700 transition-colors">Daftar Sekarang</button></div>
+        <div className="mt-12 text-center"><p className="mb-4 text-gray-600">Ingin bergabung?</p><button onClick={() => setView('register')} className="px-6 py-3 bg-[#C0392B] text-white rounded-full font-bold shadow hover:bg-red-700 transition-colors">Daftar Sekarang</button></div>
       </div>
     </section>
   );
@@ -695,44 +472,20 @@ const VolunteerList = ({ volunteers, setView }) => {
 
 const AboutStats = ({ volunteers, requests }) => {
   const activeVolunteerCount = volunteers ? volunteers.filter(v => v.status === 'Aktif').length : 0;
-  
-  // MENGHITUNG TOTAL KANTONG DARI PERMINTAAN YANG TERPENUHI
-  const fulfilledBagsCount = requests 
-    ? requests
-        .filter(r => r.status === 'Terpenuhi')
-        .reduce((sum, req) => sum + (parseInt(req.amount) || 0), 0)
-    : 0;
-
+  const fulfilledBagsCount = requests ? requests.filter(r => r.status === 'Terpenuhi').reduce((sum, req) => sum + (parseInt(req.amount) || 0), 0) : 0;
   return (
     <section className="py-16 bg-white relative">
       <div className="container mx-auto px-4 flex flex-col md:flex-row items-center gap-12">
         <div className="md:w-1/2">
-          <h2 className="text-3xl font-bold text-[#2C3E50] mb-4">Misi Kemanusiaan PMR SMANEL</h2>
-          <div className="text-gray-600 leading-relaxed mb-6 space-y-4">
-            <p>
-              Berawal dari kesadaran bahwa setetes darah sangat berharga, kami menyadari perlunya sebuah sistem yang dapat memetakan potensi pendonor di lingkungan SMAN 1 AIKMEL.
-            </p>
-            <div>
-              <h4 className="font-bold text-[#2C3E50]">🎯 Visi Kami</h4>
-              <p>Menjadi pusat informasi dan pangkalan data donor darah berbasis sekolah yang responsif, akurat, dan terpercaya.</p>
-            </div>
-            <div>
-              <h4 className="font-bold text-[#2C3E50]">🚀 Misi Kami</h4>
-              <ul className="list-decimal list-inside ml-2">
-                <li><span className="font-semibold">Digitalisasi Data:</span> Mengelola data golongan darah Warga Sekolah, dan masyarakat.</li>
-                <li><span className="font-semibold">Respons Cepat:</span> Mempercepat proses pencarian pendonor di saat-saat darurat (urgent).</li>
-              </ul>
-            </div>
-          </div>
+          <h2 className="text-3xl font-bold text-[#2C3E50] mb-4">Misi Kemanusiaan</h2>
+          <div className="text-gray-600 leading-relaxed mb-6"><p>Sistem digital untuk memetakan potensi pendonor di lingkungan SMAN 1 AIKMEL.</p></div>
           <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-[#C0392B]">{activeVolunteerCount}</div><div className="text-xs text-gray-500">Relawan Aktif</div></div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-[#C0392B]">{activeVolunteerCount}</div><div className="text-xs text-gray-500">Relawan</div></div>
             <div className="text-center p-4 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-[#C0392B]">{fulfilledBagsCount}+</div><div className="text-xs text-gray-500">Kantong Tersalur</div></div>
             <div className="text-center p-4 bg-gray-50 rounded-lg"><div className="text-2xl font-bold text-[#C0392B]">24/7</div><div className="text-xs text-gray-500">Siap Siaga</div></div>
           </div>
         </div>
-        <div className="md:w-1/2">
-          <img src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&q=80&w=800" alt="PMR Activity" className="rounded-2xl shadow-xl w-full h-96 object-cover" />
-        </div>
+        <div className="md:w-1/2"><img src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&q=80&w=800" alt="Activity" className="rounded-2xl shadow-xl w-full h-96 object-cover" /></div>
       </div>
     </section>
   );
@@ -744,33 +497,19 @@ const Education = ({ articles }) => {
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12"><h2 className="text-3xl font-bold text-[#2C3E50]">Pojok Edukasi</h2><p className="text-gray-600">Pelajari lebih lanjut tentang dunia donor darah.</p></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {articles.map((article) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">{articles.map((article) => (
             <div key={article.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               <img src={article.image} alt={article.title} className="w-full h-48 object-cover" />
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-[#2C3E50] mb-2">{article.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{article.excerpt}</p>
-                <button onClick={() => setSelectedArticle(article)} className="text-[#C0392B] font-semibold text-sm flex items-center hover:underline">Baca Selengkapnya <ChevronRight size={16} /></button>
-              </div>
+              <div className="p-6"><h3 className="text-lg font-bold text-[#2C3E50] mb-2">{article.title}</h3><p className="text-gray-600 text-sm mb-4">{article.excerpt}</p><button onClick={() => setSelectedArticle(article)} className="text-[#C0392B] font-semibold text-sm flex items-center hover:underline">Baca Selengkapnya <ChevronRight size={16} /></button></div>
             </div>
-          ))}
-        </div>
+          ))}</div>
       </div>
       {selectedArticle && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative animate-fadeIn">
-            <button onClick={() => setSelectedArticle(null)} className="absolute top-4 right-4 bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition-colors"><X size={20} className="text-gray-600" /></button>
+            <button onClick={() => setSelectedArticle(null)} className="absolute top-4 right-4 bg-gray-100 p-2 rounded-full hover:bg-gray-200"><X size={20}/></button>
             <img src={selectedArticle.image} alt={selectedArticle.title} className="w-full h-64 object-cover" />
-            <div className="p-8">
-              <h2 className="text-2xl font-bold text-[#2C3E50] mb-4">{selectedArticle.title}</h2>
-              {/* MODIFIKASI: Render konten sebagai LIST */}
-              <ul className="list-disc pl-5 space-y-3 text-gray-600 font-medium leading-relaxed">
-                {selectedArticle.content.map((item, index) => (
-                  <li key={index} className="pl-2">{item}</li>
-                ))}
-              </ul>
-            </div>
+            <div className="p-8"><h2 className="text-2xl font-bold text-[#2C3E50] mb-4">{selectedArticle.title}</h2><ul className="list-disc pl-5 space-y-3 text-gray-600">{selectedArticle.content.map((item, i) => <li key={i}>{item}</li>)}</ul></div>
           </div>
         </div>
       )}
@@ -789,52 +528,6 @@ const Footer = ({ setView }) => (
     <div className="container mx-auto px-4 text-center mt-12 pt-8 border-t border-gray-700 text-sm text-gray-400">&copy; 2026 PMR SMANEL. All rights reserved.</div>
   </footer>
 );
-
-// 9. FORMS
-const RequestForm = ({ onSubmit, isLoading }) => {
-  const [form, setForm] = useState({ patient: '', age: '', hospital: '', bloodType: 'A', rhesus: '+', amount: '', contact: '', contact2: '' });
-  return (
-    <div className="bg-white p-8 rounded-2xl shadow-lg max-w-2xl mx-auto my-10 border-t-4 border-[#C0392B]">
-      <h2 className="text-2xl font-bold text-[#2C3E50] mb-6 flex items-center gap-2"><AlertCircle className="text-[#C0392B]" /> Form Permohonan Darah</h2>
-      <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Nama Pasien</label><input required type="text" className="w-full border rounded-lg p-2" placeholder="Nama Lengkap" value={form.patient} onChange={e => setForm({...form, patient: e.target.value})} /></div>
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Usia (Opsional)</label><input type="number" className="w-full border rounded-lg p-2" placeholder="Contoh: 45" value={form.age} onChange={e => setForm({...form, age: e.target.value})} /></div>
-        </div>
-        <div><label className="block text-sm font-semibold text-gray-700 mb-1">Dirawat di</label><input required type="text" className="w-full border rounded-lg p-2" placeholder="Nama Rumah Sakit / Puskesmas" value={form.hospital} onChange={e => setForm({...form, hospital: e.target.value})} /></div>
-        <div className="grid grid-cols-2 gap-4">
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Gol Darah (Rhesus)</label><div className="flex gap-2"><select className="w-full border rounded-lg p-2 bg-white" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select><select className="w-full border rounded-lg p-2 bg-white" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">+</option><option value="-">-</option></select></div></div>
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Jumlah (Kantong)</label><input required type="number" className="w-full border rounded-lg p-2" placeholder="Contoh: 2" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} /></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label className="block text-sm font-semibold text-gray-700 mb-1">HP (Utama)</label><input required type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.contact} onChange={e => setForm({...form, contact: e.target.value})} /></div>
-            <div><label className="block text-sm font-semibold text-gray-700 mb-1">HP Alternatif (Opsional)</label><input type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.contact2} onChange={e => setForm({...form, contact2: e.target.value})} /></div>
-        </div>
-        <button disabled={isLoading} type="submit" className="w-full bg-[#C0392B] text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400">{isLoading ? 'Mengirim Data...' : 'Kirim Permohonan'}</button>
-      </form>
-    </div>
-  );
-};
-
-const VolunteerForm = ({ onSubmit, isLoading }) => {
-  const [form, setForm] = useState({ name: '', bloodType: 'A', rhesus: '+', phone: '', address: '', lastDonorDate: '' });
-  return (
-    <div className="bg-white p-8 rounded-2xl shadow-lg max-w-2xl mx-auto my-10 border-t-4 border-[#2C3E50]">
-      <h2 className="text-2xl font-bold text-[#2C3E50] mb-6 flex items-center gap-2"><UserPlus className="text-[#2C3E50]" /> Form Pendaftaran Relawan</h2>
-      <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-4">
-        <div><label className="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label><input required type="text" className="w-full border rounded-lg p-2" value={form.name} onChange={e => setForm({...form, name: e.target.value})} /></div>
-        <div className="grid grid-cols-2 gap-4">
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Golongan Darah</label><select className="w-full border rounded-lg p-2 bg-white" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Rhesus</label><select className="w-full border rounded-lg p-2 bg-white" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">Positif (+)</option><option value="-">Negatif (-)</option></select></div>
-        </div>
-        <div><label className="block text-sm font-semibold text-gray-700 mb-1">Alamat Domisili</label><input required type="text" className="w-full border rounded-lg p-2" value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
-        <div><label className="block text-sm font-semibold text-gray-700 mb-1">Waktu Donor Terakhir (Opsional)</label><input type="date" className="w-full border rounded-lg p-2" value={form.lastDonorDate} onChange={e => setForm({...form, lastDonorDate: e.target.value})} /><p className="text-xs text-gray-500 mt-1">Biarkan kosong jika belum pernah donor.</p></div>
-        <div><label className="block text-sm font-semibold text-gray-700 mb-1">No. HP / WA</label><input required type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
-        <button disabled={isLoading} type="submit" className="w-full bg-[#2C3E50] text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors disabled:bg-gray-400">{isLoading ? 'Menyimpan...' : 'Daftar Jadi Relawan'}</button>
-      </form>
-    </div>
-  );
-};
 
 const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock, setPmiStock, mobileUnit, setMobileUnit, onLogout, showToast, showConfirm }) => {
   const [activeTab, setActiveTab] = useState('requests');
@@ -936,16 +629,16 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
   return (
     <div className="min-h-screen bg-gray-100 flex relative">
       {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSidebarOpen(false)}></div>}
-      <aside className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-[#2C3E50] text-white transition-transform duration-300 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-        <div className="p-6 border-b border-gray-700 flex justify-between items-center"><div><h2 className="text-xl font-bold">Admin Panel</h2><p className="text-xs text-gray-400">PMR SMANEL</p></div><button onClick={() => setSidebarOpen(false)} className="md:hidden text-gray-300"><X size={20} /></button></div>
-        <nav className="p-4 space-y-2">
-          <button onClick={() => { setActiveTab('requests'); setShowAddForm(false); setSidebarOpen(false); }} className={`w-full text-left p-3 rounded hover:bg-white/10 ${activeTab === 'requests' ? 'bg-[#C0392B]' : ''}`}>Permohonan</button>
-          <button onClick={() => { setActiveTab('volunteers'); setShowAddForm(false); setSidebarOpen(false); }} className={`w-full text-left p-3 rounded hover:bg-white/10 ${activeTab === 'volunteers' ? 'bg-[#C0392B]' : ''}`}>Data Relawan</button>
-          <button onClick={() => { setActiveTab('stock'); setSidebarOpen(false); }} className={`w-full text-left p-3 rounded hover:bg-white/10 ${activeTab === 'stock' ? 'bg-[#C0392B]' : ''}`}>Update Stok & Jadwal</button>
-          <button onClick={onLogout} className="w-full text-left p-3 rounded hover:bg-white/10 text-red-300 mt-10 flex items-center gap-2"><LogOut size={16}/> Logout</button>
-        </nav>
-      </aside>
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto h-screen">
+      <aside className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-[#2C3E50] text-white transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+         <div className="p-6 font-bold text-xl border-b border-gray-700 flex justify-between">Admin Panel <button className="md:hidden" onClick={() => setSidebarOpen(false)}><X/></button></div>
+         <nav className="p-4 space-y-2">
+            <button onClick={() => setActiveTab('requests')} className={`block w-full text-left p-3 rounded ${activeTab==='requests'?'bg-[#C0392B]':''}`}>Permohonan</button>
+            <button onClick={() => setActiveTab('volunteers')} className={`block w-full text-left p-3 rounded ${activeTab==='volunteers'?'bg-[#C0392B]':''}`}>Relawan</button>
+            <button onClick={() => setActiveTab('stock')} className={`block w-full text-left p-3 rounded ${activeTab==='stock'?'bg-[#C0392B]':''}`}>Stok & Jadwal</button>
+            <button onClick={onLogout} className="block w-full text-left p-3 rounded text-red-300 mt-10">Logout</button>
+         </nav>
+       </aside>
+       <main className="flex-1 p-4 md:p-8 ml-0 md:ml-64">
         <div className="flex justify-between items-center mb-6 md:mb-8">
           <div className="flex items-center gap-3"><button onClick={() => setSidebarOpen(true)} className="md:hidden text-[#2C3E50]"><Menu size={24}/></button><h1 className="text-xl md:text-2xl font-bold text-[#2C3E50]">{activeTab === 'requests' ? 'Verifikasi Permohonan' : activeTab === 'volunteers' ? 'Manajemen Relawan' : 'Update Stok & Jadwal'}</h1></div>
           <button onClick={onLogout} className="md:hidden text-red-500"><LogOut/></button>
@@ -1193,19 +886,6 @@ const App = () => {
   };
 
   useEffect(() => {
-    // 1. CEK URL PARAMS UNTUK DEEP LINKING (BERBASIS ID)
-    const params = new URLSearchParams(window.location.search);
-    const viewParam = params.get('view');
-    const idParam = params.get('id');
-
-    if (viewParam) {
-      setView(viewParam);
-    }
-    if (idParam) {
-      setSharedId(idParam);
-    }
-
-    // 2. CEK CACHE
     const cachedVolunteers = localStorage.getItem('volunteers');
     const cachedRequests = localStorage.getItem('requests');
     const cachedMobileUnit = localStorage.getItem('mobileUnit');
@@ -1327,15 +1007,13 @@ const App = () => {
       {view === 'register' && <div className="animate-fadeIn min-h-screen bg-blue-50 py-10"><div className="container mx-auto px-4 text-center"><h1 className="text-3xl font-bold text-[#2C3E50] mb-2">Mari Berbagi Kehidupan</h1><p className="text-gray-600">Bergabunglah menjadi relawan donor darah PMR SMANEL.</p><VolunteerForm onSubmit={handleVolunteerSubmit} isLoading={submitLoading} /></div></div>}
       {view === 'stock' && <div className="animate-fadeIn pt-10"><StockDashboard bloodStock={bloodStock} pmiStock={pmiStock} mobileUnit={mobileUnit} /></div>}
       {view === 'education' && <div className="animate-fadeIn pt-10"><Education articles={ARTICLES} /></div>}
-      <Footer setView={setView} />
       
-      {/* GLOBAL TOAST & MODAL */}
+      <Footer setView={setView} />
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
-        .animate-slideIn { animation: slideIn 0.3s ease-out forwards; }
       `}</style>
     </div>
   );
