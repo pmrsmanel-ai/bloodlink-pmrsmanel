@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Heart, 
   Droplet, 
@@ -33,8 +33,13 @@ import {
   Clock,
   Share2,
   AlertTriangle,
-  ArrowLeft
+  ArrowLeft,
+  Camera,
+  Download
 } from 'lucide-react';
+
+// PERLU DIINSTALL: npm install html2canvas
+import html2canvas from 'html2canvas';
 
 // --- KONFIGURASI DATABASE ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
@@ -54,7 +59,7 @@ const Toast = ({ message, type, onClose }) => {
   };
 
   return (
-    <div className={`fixed top-4 right-4 z-[100] ${bgColors[type] || bgColors.info} text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-slideIn`}>
+    <div className={`fixed top-4 right-4 z-[99999] ${bgColors[type] || bgColors.info} text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-slideIn`}>
       {type === 'success' && <CheckCircle size={20} />}
       {type === 'error' && <AlertCircle size={20} />}
       <span className="font-bold text-sm">{typeof message === 'string' ? message : 'Notifikasi'}</span>
@@ -66,7 +71,7 @@ const Toast = ({ message, type, onClose }) => {
 const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, isLoading }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
       <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform scale-100 transition-all">
         <div className="flex flex-col items-center text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-500 mb-4">
@@ -81,6 +86,144 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, isLoading }
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// --- KOMPONEN POSTER INSTAGRAM (UPDATED) ---
+const IGPosterModal = ({ patient, onClose }) => {
+  const posterRef = useRef(null);
+  const [downloading, setDownloading] = useState(false);
+
+  if (!patient) return null;
+
+  const handleDownload = async () => {
+    if (!posterRef.current) return;
+    setDownloading(true);
+
+    try {
+      // Tunggu render gambar (jika ada)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const canvas = await html2canvas(posterRef.current, {
+        scale: 2, // Kualitas HD
+        useCORS: true, // Izinkan gambar eksternal
+        backgroundColor: null // Transparan
+      });
+
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = `BloodLink-Poster-${patient.patient.replace(/\s+/g, '-')}.png`;
+      link.click();
+    } catch (error) {
+      console.error("Gagal download poster:", error);
+      alert("Gagal membuat poster. Pastikan koneksi internet stabil.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  return (
+    // Z-Index sangat tinggi agar tidak tertutup header
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-fadeIn overflow-y-auto">
+      <div className="relative w-full max-w-sm flex flex-col items-center">
+        
+        {/* Tombol Tutup di luar area poster agar mudah diklik */}
+        <button 
+          onClick={onClose} 
+          className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full mb-4 flex items-center gap-2 font-bold backdrop-blur-sm transition-all"
+        >
+          <X size={20} /> Tutup
+        </button>
+
+        {/* AREA POSTER (YANG AKAN DI-DOWNLOAD) */}
+        <div ref={posterRef} className="w-full bg-gradient-to-br from-red-600 to-red-900 p-6 rounded-[2rem] shadow-2xl text-white relative overflow-hidden border-[6px] border-white">
+          {/* Dekorasi Background */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-10 translate-x-10 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/20 rounded-full blur-3xl translate-y-10 -translate-x-10 pointer-events-none"></div>
+          
+          {/* Header Poster */}
+          <div className="relative z-10 flex justify-between items-center mb-6">
+            <div className="flex items-center gap-2.5">
+              <div className="bg-white text-red-600 p-2.5 rounded-xl shadow-lg">
+                <Droplet size={24} fill="currentColor" />
+              </div>
+              <div>
+                <h3 className="font-black text-xl leading-none tracking-tight">URGENT</h3>
+                <p className="text-[10px] opacity-90 font-bold uppercase tracking-[0.2em] mt-0.5">Butuh Donor Darah</p>
+              </div>
+            </div>
+            <div className="bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/20">
+              PMR SMANEL
+            </div>
+          </div>
+
+          {/* Konten Utama */}
+          <div className="relative z-10 bg-white text-[#2C3E50] rounded-[1.5rem] p-6 shadow-2xl mb-6">
+            <div className="text-center mb-6 border-b border-gray-100 pb-6">
+              <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-2">Golongan Darah</p>
+              <div className="flex items-center justify-center gap-1">
+                <span className="text-7xl font-black text-red-600 tracking-tighter">{patient.bloodType}</span>
+                <span className="text-3xl font-black text-gray-300 mt-2">{safeText(patient.rhesus)}</span>
+              </div>
+              <div className="mt-3 inline-block bg-red-50 text-red-600 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-red-100">
+                Butuh {patient.amount} Kantong
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <div className="flex items-start gap-4">
+                <div className="bg-gray-50 p-2 rounded-full text-red-500"><User size={20} /></div>
+                <div>
+                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Pasien</p>
+                  <p className="font-bold text-lg leading-tight text-gray-800">{patient.patient}</p>
+                  <p className="text-xs text-gray-500 font-medium mt-0.5">{patient.age ? `${patient.age} Tahun` : ''}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="bg-gray-50 p-2 rounded-full text-red-500"><MapPin size={20} /></div>
+                <div>
+                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Lokasi / RS</p>
+                  <p className="font-bold text-lg leading-tight text-gray-800">{patient.hospital}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="bg-gray-50 p-2 rounded-full text-red-500"><Phone size={20} /></div>
+                <div>
+                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider">Hubungi Keluarga</p>
+                  <p className="font-bold text-xl leading-tight text-gray-800">{patient.contact}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Poster */}
+          <div className="relative z-10 text-center">
+            <p className="text-xs font-bold text-white/90 mb-3 italic">"Setetes darah Anda, nyawa bagi sesama."</p>
+            <div className="bg-black/30 backdrop-blur-sm rounded-xl p-3 inline-flex items-center gap-3 border border-white/10">
+              <Instagram size={18} />
+              <span className="text-xs font-black tracking-wide">@pmr_smanel</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Tombol Download */}
+        <button 
+          onClick={handleDownload}
+          disabled={downloading}
+          className="mt-6 w-full py-4 bg-white text-red-600 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {downloading ? (
+            <><Loader size={18} className="animate-spin" /> Memproses...</>
+          ) : (
+            <><Download size={18} /> Simpan Gambar</>
+          )}
+        </button>
+        <p className="text-white/60 text-[10px] mt-3 font-medium text-center max-w-xs">
+          Gambar akan tersimpan otomatis. Siap diupload ke IG Story / WA Status.
+        </p>
       </div>
     </div>
   );
@@ -320,6 +463,7 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
 const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBlood, setFilterBlood] = useState('ALL');
+  const [posterData, setPosterData] = useState(null); // STATE UNTUK POSTER
 
   // Filter khusus jika dibuka via link share
   const activeRequests = requests.filter(req => {
@@ -327,13 +471,15 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
     if (sharedId) {
         return String(req.id) === String(sharedId);
     }
-
     // 2. Logika normal
     const isSearching = req.status === 'Mencari';
     const matchesSearch = searchTerm === '' || req.patient.toLowerCase().includes(searchTerm.toLowerCase()) || req.hospital.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterBlood === 'ALL' || req.bloodType === filterBlood;
     return isSearching && matchesSearch && matchesFilter;
   });
+
+  // SORTING: Pasien Terbaru (ID Lebih Besar) Paling Atas
+  const sortedRequests = [...activeRequests].sort((a, b) => b.id - a.id);
 
   const handleShare = async (req) => {
     // URL SHARE MENGGUNAKAN ID UNIK
@@ -393,11 +539,11 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
             </div>
         )}
 
-        {activeRequests.length === 0 ? (
+        {sortedRequests.length === 0 ? (
           <div className="text-center py-10 bg-white rounded-xl shadow"><CheckCircle size={48} className="mx-auto text-green-500 mb-4" /><h3 className="text-xl font-bold text-gray-700">{sharedId ? "Data pasien tidak ditemukan / sudah terpenuhi." : "Tidak ada permintaan ditemukan."}</h3><p className="text-gray-500">{sharedId ? "Silakan lihat daftar pasien lainnya." : "Stok darah aman atau semua kebutuhan telah terpenuhi."}</p>{sharedId && <button onClick={clearSharedFilter} className="mt-4 text-[#C0392B] font-bold underline">Lihat Semua Daftar</button>}</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeRequests.map(req => (
+            {sortedRequests.map(req => (
               <div key={req.id} className={`bg-white p-6 rounded-xl shadow-md border-l-4 border-[#C0392B] hover:-translate-y-1 transition-transform relative ${sharedId ? 'ring-4 ring-yellow-200 shadow-2xl scale-105' : ''}`}>
                 <div className="flex justify-between items-start mb-2">
                   <div><h3 className="font-bold text-xl text-[#2C3E50]">{req.patient}</h3><div className="flex items-center text-xs text-gray-500 mt-1">{req.age ? `${req.age} Tahun • ` : ''} <MapPin size={12} className="mx-1" /> {req.hospital}</div></div>
@@ -406,8 +552,11 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
                 <div className="mb-4"><div className="bg-red-50 text-red-700 text-sm px-3 py-2 rounded-lg font-semibold flex items-center justify-between"><span>Dibutuhkan:</span><span className="font-bold text-lg">{req.amount || '?'} Kantong</span></div></div>
                 <div className="space-y-2 mb-6"><div className="text-sm bg-gray-50 p-2 rounded"><span className="font-semibold block text-xs text-gray-400">STATUS</span><span className="text-red-600 font-bold animate-pulse">URGENT / MENCARI</span></div><div className="text-sm bg-gray-50 p-2 rounded"><span className="font-semibold block text-xs text-gray-400">KONTAK (HP)</span><div className="flex items-center gap-2 font-medium"><Phone size={14} /> {safeText(req.contact)}</div></div></div>
                 <div className="grid grid-cols-5 gap-2">
-                    <a href={getWALink(req.contact, `Halo, saya melihat info dari BloodLink PMR SMANEL bahwa pasien a.n ${req.patient} (${req.age ? req.age + ' th' : ''}) membutuhkan donor darah ${req.bloodType}${safeText(req.rhesus)} sebanyak ${req.amount || '?'} kantong di ${req.hospital}. Apakah masih membutuhkan?`)} target="_blank" rel="noreferrer" className="col-span-4 bg-[#25D366] text-white py-2 rounded-lg font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"><MessageCircle size={18} /> Hubungi via WhatsApp</a>
+                    <a href={getWALink(req.contact, `Halo, saya melihat info dari BloodLink PMR SMANEL bahwa pasien a.n ${req.patient} (${req.age ? req.age + ' th' : ''}) membutuhkan donor darah ${req.bloodType}${safeText(req.rhesus)} sebanyak ${req.amount || '?'} kantong di ${req.hospital}. Apakah masih membutuhkan?`)} target="_blank" rel="noreferrer" className="col-span-3 bg-[#25D366] text-white py-2 rounded-lg font-bold hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm"><MessageCircle size={18} /> Chat</a>
                     <button onClick={() => handleShare(req)} className="col-span-1 bg-blue-500 text-white rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors shadow-sm"><Share2 size={20} /></button>
+                    {/* BUTTON POSTER IG */}
+                    <button onClick={() => setPosterData(req)} className="col-span-1 bg-purple-500 text-white rounded-lg flex items-center justify-center hover:bg-purple-600 transition-colors shadow-sm" title="Buat Poster IG"><Instagram size={20} /></button>
+
                     {req.contact2 && (
                       <a href={getWALink(req.contact2, `Halo, saya melihat info dari BloodLink PMR SMANEL bahwa pasien a.n ${req.patient} membutuhkan donor darah. Saya menghubungi nomor alternatif ini karena nomor utama sulit dihubungi.`)} target="_blank" rel="noreferrer" className="col-span-5 bg-teal-500 text-white py-2 rounded-lg font-bold hover:bg-teal-600 transition-colors flex items-center justify-center gap-2 text-sm"><MessageCircle size={18} /> Hubungi Alternatif (Kel. Lain)</a>
                     )}
@@ -418,6 +567,9 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
         )}
         <div className="mt-12 text-center"><p className="mb-4 text-gray-600">Anda atau kerabat butuh darah?</p><button onClick={() => setView('search')} className="px-6 py-3 bg-[#2C3E50] text-white rounded-full font-bold shadow hover:bg-gray-700 transition-colors">Ajukan Permohonan Darah</button></div>
       </div>
+      
+      {/* MODAL POSTER IG */}
+      {posterData && <IGPosterModal patient={posterData} onClose={() => setPosterData(null)} />}
     </section>
   );
 };
