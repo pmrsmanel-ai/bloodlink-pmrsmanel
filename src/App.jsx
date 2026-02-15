@@ -42,8 +42,10 @@ import {
   Rocket
 } from 'lucide-react';
 
-// PERLU DIINSTALL: npm install html2canvas
-import html2canvas from 'html2canvas'; // DIKOMENTARI AGAR PREVIEW AMAN
+// --- [INSTRUKSI UNTUK DEPLOY / PRODUCTION] ---
+// 1. Jalankan perintah di terminal: npm install html2canvas
+// 2. Uncomment (hapus //) baris import di bawah ini:
+// import html2canvas from 'html2canvas'; 
 
 // --- KONFIGURASI DATABASE ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
@@ -99,8 +101,39 @@ const IGPosterModal = ({ patient, onClose }) => {
   const posterRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
 
-  const handleDownloadMock = () => {
-    alert("Fitur download dinonaktifkan di mode pratinjau agar tidak error.");
+  // --- [KODE PRODUCTION] ---
+  // Hapus komentar pada blok di bawah ini saat sudah install html2canvas dan siap deploy
+  
+  const handleDownload = async () => {
+    if (!posterRef.current) return;
+    setDownloading(true);
+
+    try {
+      // Scroll ke atas agar capture tidak terpotong
+      window.scrollTo(0, 0); 
+      await new Promise((resolve) => setTimeout(resolve, 800)); // Tunggu render font
+
+      const canvas = await html2canvas(posterRef.current, {
+        scale: 3, 
+        useCORS: true, 
+        backgroundColor: "#ffffff",
+        scrollX: 0,
+        scrollY: 0, 
+        x: 0,
+        y: 0
+      });
+
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = `BloodLink-${patient.patient.replace(/\s+/g, '-')}.png`;
+      link.click();
+    } catch (error) {
+      console.error("Gagal download poster:", error);
+      alert("Gagal membuat poster. Pastikan koneksi internet stabil.");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   if (!patient) return null;
@@ -139,13 +172,13 @@ const IGPosterModal = ({ patient, onClose }) => {
 
           {/* Body Content */}
           <div className="px-7 py-8 bg-white">
-            {/* Golongan Darah - Diperbaiki agar tidak overlap */}
+            {/* Golongan Darah */}
             <div className="flex flex-col items-center justify-center mb-10">
-               <div className="flex items-start justify-center gap-2 mb-4"> {/* Removed scale-110 to reduce size */}
-                    <span className="text-8xl font-black text-slate-800 leading-none tracking-tighter">{patient.bloodType}</span> {/* Reduced to 8xl */}
-                    <span className="text-4xl font-bold text-[#800000] mt-2">{safeText(patient.rhesus)}</span>
+               <div className="flex items-start justify-center gap-1 mb-3 transform scale-110">
+                    <span className="text-[100px] font-bold text-slate-800 leading-[0.8] tracking-tighter">{patient.bloodType}</span>
+                    <span className="text-5xl font-bold text-[#800000] mt-2">{safeText(patient.rhesus)}</span>
                </div>
-               <div className="bg-red-50 text-[#800000] px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-widest border border-red-100">
+               <div className="bg-red-50 text-[#800000] px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest border border-red-100">
                   Dibutuhkan {patient.amount} Kantong
                </div>
             </div>
@@ -202,9 +235,9 @@ const IGPosterModal = ({ patient, onClose }) => {
           </div>
         </div>
 
-        {/* Tombol Download (MOCK) */}
+        {/* Tombol Download */}
         <button 
-          onClick={handleDownloadMock}
+          onClick={handleDownload}
           disabled={downloading}
           className="mt-8 w-full py-4 bg-white text-[#800000] rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-red-50 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
         >
@@ -363,11 +396,9 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
                 <span className="flex items-center gap-3"><Droplet className="text-[#800000]" fill="currentColor" /> Relawan Siap Donor</span>
                 <span className="text-xs bg-red-100 text-[#800000] py-1.5 px-4 rounded-full font-bold">Total: {totalVolunteers}</span>
             </h3>
-            {/* GRID RELAWAN: Diubah agar tidak overlap */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-5">
                 {Object.entries(bloodStock).map(([type, data]) => (
                     <div key={type} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-red-300 transition-all">
-                        {/* Aksen atas */}
                         <div className="absolute top-0 left-0 w-full h-1 bg-[#800000]"></div>
                         
                         <div className="mb-3 mt-1">
@@ -375,7 +406,6 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
                             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider -mt-1">Golongan</div>
                         </div>
 
-                        {/* Rincian Rh dalam box terpisah */}
                         <div className="w-full flex justify-between gap-2 px-2">
                              <div className="flex flex-col items-center flex-1 bg-slate-50 rounded p-1 border border-slate-100">
                                  <span className="text-[9px] font-bold text-slate-400 uppercase">Rh+</span>
@@ -453,11 +483,6 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
     </section>
   );
 };
-
-// ... PatientList, VolunteerForm, RequestForm, VolunteerList, AboutStats, Education, Footer, AdminPanel, Login, App (sama seperti sebelumnya) ...
-// (Untuk menghemat ruang, saya hanya menampilkan bagian StockDashboard yang diubah. Komponen lain tetap sama dan perlu disertakan dalam file penuh)
-
-// KODE LENGKAP DI BAWAH INI MENGGABUNGKAN SEMUA PERUBAHAN:
 
 const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -751,7 +776,7 @@ const AboutStats = ({ volunteers, requests }) => {
         <div className="text-center max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-black text-slate-800 mb-6 leading-tight">
             Misi Kemanusiaan <br/>
-            <span className="text-[#800000] text-5xl md:text-6xl">PMR SMANEL</span>
+            <span className="text-[#C0392B] text-5xl md:text-6xl">PMR SMANEL</span>
           </h2>
           <div className="text-slate-600 leading-relaxed mb-8 space-y-6 text-base">
             <p>
@@ -769,7 +794,8 @@ const AboutStats = ({ volunteers, requests }) => {
                   <ul className="space-y-2 text-sm text-slate-500">
                     <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Digitalisasi Data:</strong> Mengelola data golongan darah warga sekolah dan masyarakat secara terstruktur dan aman.</span></li>
                     <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Respons Cepat:</strong> Mempercepat proses pencarian pendonor di saat-saat darurat (urgent) melalui teknologi.</span></li>
-                    <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Edukasi & Sinergi:</strong> Meningkatkan kesadaran dan kolaborasi dengan UTD.</span></li>
+                    <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Edukasi Masif:</strong> Meningkatkan kesadaran akan pentingnya donor darah bagi kesehatan dan nilai kemanusiaan.</span></li>
+                    <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Sinergi Kemanusiaan:</strong> Membangun kolaborasi solid antara sekolah, Unit Transfusi Darah (UTD), dan masyarakat luas.</span></li>
                   </ul>
                 </div>
             </div>
@@ -1046,7 +1072,7 @@ const App = () => {
     <div className="font-sans text-gray-800">
       <Navbar setView={setView} view={view} isLoggedIn={isLoggedIn} />
       {loadingData && (
-        <div className="fixed top-20 left-0 w-full bg-yellow-100 text-yellow-800 text-center py-2 text-sm z-40 flex items-center justify-center gap-2">
+        <div className="fixed top-20 left-0 w-full bg-yellow-100 text-yellow-800 text-center py-2 text-sm z-40 flex items-center justify-center gap-2 border-b border-yellow-200">
            <Loader className="animate-spin" size={16}/> Sinkronisasi data server...
         </div>
       )}
