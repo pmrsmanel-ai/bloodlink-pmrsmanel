@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 
 // PERLU DIINSTALL: npm install html2canvas
-import html2canvas from 'html2canvas'; // DIKOMENTARI AGAR PREVIEW AMAN
+// import html2canvas from 'html2canvas'; // DIKOMENTARI AGAR PREVIEW AMAN
 
 // --- KONFIGURASI DATABASE ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
@@ -94,47 +94,10 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, isLoading }
   );
 };
 
-// --- KOMPONEN POSTER INSTAGRAM (REDESIGN MINIMALIS & NO BOLD EXTREME) ---
+// --- KOMPONEN POSTER INSTAGRAM ---
 const IGPosterModal = ({ patient, onClose }) => {
   const posterRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
-
-  // LOGIKA DOWNLOAD DIMATIKAN SEMENTARA UNTUK PREVIEW
-  /*
-  const handleDownload = async () => {
-    if (!posterRef.current || !window.html2canvas) {
-        alert("Fitur download sedang memuat komponen, silakan coba lagi dalam beberapa detik.");
-        return;
-    }
-    setDownloading(true);
-
-    try {
-      window.scrollTo(0, 0); 
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const canvas = await window.html2canvas(posterRef.current, {
-        scale: 3, 
-        useCORS: true, 
-        backgroundColor: "#ffffff",
-        scrollX: 0,
-        scrollY: 0, 
-        x: 0,
-        y: 0
-      });
-
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = image;
-      link.download = `BloodLink-${patient.patient.replace(/\s+/g, '-')}.png`;
-      link.click();
-    } catch (error) {
-      console.error("Gagal download poster:", error);
-      alert("Gagal membuat poster. Pastikan koneksi internet stabil.");
-    } finally {
-      setDownloading(false);
-    }
-  };
-  */
 
   const handleDownloadMock = () => {
     alert("Fitur download dinonaktifkan di mode pratinjau agar tidak error.");
@@ -153,9 +116,8 @@ const IGPosterModal = ({ patient, onClose }) => {
           <X size={18} /> Tutup Preview
         </button>
 
-        {/* AREA POSTER (FIXED WIDTH, DESIGN MINIMALIS, NO OVERLAP) */}
+        {/* AREA POSTER (FIXED WIDTH) */}
         <div ref={posterRef} className="w-[360px] flex-shrink-0 bg-white shadow-2xl relative overflow-hidden box-border rounded-[24px]">
-          
           {/* Header Minimalis */}
           <div className="bg-gradient-to-r from-rose-600 to-red-600 px-6 py-6 text-white relative z-10">
             <div className="flex justify-between items-center">
@@ -177,8 +139,7 @@ const IGPosterModal = ({ patient, onClose }) => {
 
           {/* Body Content */}
           <div className="px-7 py-8 bg-white">
-            
-            {/* Golongan Darah - Clean Look */}
+            {/* Golongan Darah */}
             <div className="flex flex-col items-center justify-center mb-10">
                <div className="flex items-start justify-center gap-1 mb-3 transform scale-110">
                     <span className="text-[100px] font-bold text-slate-800 leading-[0.8] tracking-tighter">{patient.bloodType}</span>
@@ -189,9 +150,8 @@ const IGPosterModal = ({ patient, onClose }) => {
                </div>
             </div>
 
-            {/* Detail Info - List Style */}
+            {/* Detail Info */}
             <div className="space-y-6">
-              {/* Pasien */}
               <div className="flex items-center gap-4 group">
                 <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-rose-500 group-hover:bg-rose-50 transition-colors duration-300">
                     <User size={20} strokeWidth={2} />
@@ -202,8 +162,6 @@ const IGPosterModal = ({ patient, onClose }) => {
                   {patient.age && <p className="text-xs text-slate-500 font-medium mt-0.5">Usia: {patient.age} Tahun</p>}
                 </div>
               </div>
-
-              {/* RS */}
               <div className="flex items-center gap-4 group">
                 <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-rose-500 group-hover:bg-rose-50 transition-colors duration-300">
                     <MapPin size={20} strokeWidth={2} />
@@ -213,8 +171,6 @@ const IGPosterModal = ({ patient, onClose }) => {
                   <p className="font-bold text-lg text-slate-800 leading-tight">{patient.hospital}</p>
                 </div>
               </div>
-
-              {/* Kontak */}
               <div className="flex items-center gap-4 group">
                 <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-rose-500 group-hover:bg-rose-50 transition-colors duration-300">
                     <Phone size={20} strokeWidth={2} />
@@ -227,7 +183,7 @@ const IGPosterModal = ({ patient, onClose }) => {
             </div>
           </div>
 
-          {/* Footer - Link Website */}
+          {/* Footer */}
           <div className="bg-slate-900 py-5 px-6 text-center">
              <div className="flex flex-col gap-3 items-center text-slate-300">
                 <p className="text-[10px] italic opacity-80 font-medium font-serif">"Setetes darah Anda, nyawa bagi sesama."</p>
@@ -470,6 +426,7 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
                 </table>
               </div>
             </div>
+            
             <div className="bg-slate-800 p-8 rounded-3xl text-white shadow-lg shadow-slate-300 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
               <h3 className="text-lg font-bold mb-6 flex items-center gap-3 relative z-10"><Calendar className="text-rose-400" /> Jadwal Mobil Unit</h3>
@@ -639,8 +596,12 @@ const VolunteerForm = ({ onSubmit, isLoading }) => {
           <div><label className="block text-sm font-semibold text-gray-700 mb-1">Alamat Domisili</label><input required type="text" className="w-full border rounded-lg p-2" value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
           <div><label className="block text-sm font-semibold text-gray-700 mb-1">Waktu Donor Terakhir (Opsional)</label><input type="date" className="w-full border rounded-lg p-2" value={form.lastDonorDate} onChange={e => setForm({...form, lastDonorDate: e.target.value})} /><p className="text-xs text-gray-500 mt-1">Biarkan kosong jika belum pernah donor.</p></div>
           
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">No. WhatsApp Aktif</label><input required type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
-          
+          {/* INPUT KONTAK */}
+          <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">No. HP / WA</label>
+              <input required type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
+          </div>
+
           {/* DISCLAIMER TAMBAHAN */}
           <div className="bg-blue-50 p-4 rounded-xl flex items-start gap-3 border border-blue-100">
              <Info size={18} className="text-blue-600 mt-0.5 shrink-0" />
@@ -735,7 +696,6 @@ const VolunteerList = ({ volunteers, setView }) => {
                     {eligibility.eligible ? (
                         <>
                         <a href={getWALink(vol.phone, `Halo Kak ${vol.name}, dari BloodLink...`)} target="_blank" rel="noreferrer" className="w-full bg-emerald-500 text-white py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide flex justify-center gap-2 hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-100"><MessageCircle size={16}/> Hubungi Relawan</a>
-                        {vol.phone2 && <a href={getWALink(vol.phone2, `Halo Ortu Kak ${vol.name}...`)} target="_blank" rel="noreferrer" className="w-full bg-blue-500 text-white py-2.5 rounded-xl font-bold text-xs uppercase tracking-wide flex justify-center gap-2 hover:bg-blue-600 transition-colors shadow-lg shadow-blue-100"><MessageCircle size={16}/> Hubungi Ortu</a>}
                         </>
                     ) : (
                         <button disabled className="w-full bg-slate-100 text-slate-400 py-3 rounded-xl font-bold text-xs uppercase tracking-wide cursor-not-allowed flex items-center justify-center gap-2">
