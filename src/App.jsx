@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 
 // PERLU DIINSTALL: npm install html2canvas
-// import html2canvas from 'html2canvas'; // DIKOMENTARI AGAR PREVIEW AMAN
+import html2canvas from 'html2canvas'; // DIKOMENTARI AGAR PREVIEW AMAN
 
 // --- KONFIGURASI DATABASE ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
@@ -56,15 +56,15 @@ const Toast = ({ message, type, onClose }) => {
   }, [onClose]);
 
   const bgColors = {
-    success: 'bg-green-500',
-    error: 'bg-red-500',
-    info: 'bg-blue-500'
+    success: 'bg-green-600',
+    error: 'bg-[#800000]',
+    info: 'bg-blue-600'
   };
 
   return (
     <div className={`fixed top-6 right-6 z-[99999] ${bgColors[type] || bgColors.info} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-slideIn backdrop-blur-sm bg-opacity-95 border border-white/10`}>
       {type === 'success' && <CheckCircle size={24} className="text-emerald-100" />}
-      {type === 'error' && <AlertCircle size={24} className="text-rose-100" />}
+      {type === 'error' && <AlertCircle size={24} className="text-red-100" />}
       <span className="font-semibold text-sm tracking-wide">{typeof message === 'string' ? message : 'Notifikasi'}</span>
       <button onClick={onClose} className="ml-2 hover:bg-white/20 p-1.5 rounded-full transition-colors"><X size={16}/></button>
     </div>
@@ -77,14 +77,14 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, isLoading }
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fadeIn">
       <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform scale-100 transition-all border border-slate-100">
         <div className="flex flex-col items-center text-center">
-          <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center text-rose-500 mb-6 shadow-sm">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-[#800000] mb-6 shadow-sm">
             <AlertTriangle size={36} strokeWidth={1.5} />
           </div>
           <h3 className="text-2xl font-bold text-slate-800 mb-3">{title}</h3>
           <p className="text-slate-500 text-sm leading-relaxed mb-8">{message}</p>
           <div className="flex gap-3 w-full">
             <button onClick={onCancel} disabled={isLoading} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">Batal</button>
-            <button onClick={onConfirm} disabled={isLoading} className="flex-1 py-3.5 bg-rose-600 text-white rounded-xl font-bold text-sm hover:bg-rose-700 hover:shadow-lg hover:shadow-rose-200 transition-all flex items-center justify-center gap-2">
+            <button onClick={onConfirm} disabled={isLoading} className="flex-1 py-3.5 bg-[#800000] text-white rounded-xl font-bold text-sm hover:bg-red-900 hover:shadow-lg hover:shadow-red-200 transition-all flex items-center justify-center gap-2">
               {isLoading ? <Loader size={18} className="animate-spin" /> : 'Ya, Hapus'}
             </button>
           </div>
@@ -118,8 +118,8 @@ const IGPosterModal = ({ patient, onClose }) => {
 
         {/* AREA POSTER (FIXED WIDTH) */}
         <div ref={posterRef} className="w-[360px] flex-shrink-0 bg-white shadow-2xl relative overflow-hidden box-border rounded-[24px]">
-          {/* Header Minimalis */}
-          <div className="bg-gradient-to-r from-rose-600 to-red-600 px-6 py-6 text-white relative z-10">
+          {/* Header Minimalis Maroon */}
+          <div className="bg-gradient-to-r from-[#800000] to-red-900 px-6 py-6 text-white relative z-10">
             <div className="flex justify-between items-center">
                <div className="flex items-center gap-3">
                   <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm border border-white/20">
@@ -127,7 +127,7 @@ const IGPosterModal = ({ patient, onClose }) => {
                   </div>
                   <div>
                       <h3 className="font-bold text-xl leading-none tracking-tight">URGENT</h3>
-                      <p className="text-[10px] font-medium opacity-90 tracking-[0.2em] mt-1 text-rose-100">BUTUH DONOR DARAH</p>
+                      <p className="text-[10px] font-medium opacity-90 tracking-[0.2em] mt-1 text-red-100">BUTUH DONOR DARAH</p>
                   </div>
                </div>
                <div className="text-right">
@@ -143,9 +143,9 @@ const IGPosterModal = ({ patient, onClose }) => {
             <div className="flex flex-col items-center justify-center mb-10">
                <div className="flex items-start justify-center gap-1 mb-3 transform scale-110">
                     <span className="text-[100px] font-bold text-slate-800 leading-[0.8] tracking-tighter">{patient.bloodType}</span>
-                    <span className="text-5xl font-bold text-rose-500 mt-2">{safeText(patient.rhesus)}</span>
+                    <span className="text-5xl font-bold text-[#800000] mt-2">{safeText(patient.rhesus)}</span>
                </div>
-               <div className="bg-rose-50 text-rose-600 px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest border border-rose-100">
+               <div className="bg-red-50 text-[#800000] px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest border border-red-100">
                   Dibutuhkan {patient.amount} Kantong
                </div>
             </div>
@@ -153,7 +153,7 @@ const IGPosterModal = ({ patient, onClose }) => {
             {/* Detail Info */}
             <div className="space-y-6">
               <div className="flex items-center gap-4 group">
-                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-rose-500 group-hover:bg-rose-50 transition-colors duration-300">
+                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-[#800000] group-hover:bg-red-50 transition-colors duration-300">
                     <User size={20} strokeWidth={2} />
                 </div>
                 <div className="flex-1 border-b border-slate-100 pb-3">
@@ -163,7 +163,7 @@ const IGPosterModal = ({ patient, onClose }) => {
                 </div>
               </div>
               <div className="flex items-center gap-4 group">
-                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-rose-500 group-hover:bg-rose-50 transition-colors duration-300">
+                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-[#800000] group-hover:bg-red-50 transition-colors duration-300">
                     <MapPin size={20} strokeWidth={2} />
                 </div>
                 <div className="flex-1 border-b border-slate-100 pb-3">
@@ -172,7 +172,7 @@ const IGPosterModal = ({ patient, onClose }) => {
                 </div>
               </div>
               <div className="flex items-center gap-4 group">
-                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-rose-500 group-hover:bg-rose-50 transition-colors duration-300">
+                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-500 group-hover:text-[#800000] group-hover:bg-red-50 transition-colors duration-300">
                     <Phone size={20} strokeWidth={2} />
                 </div>
                 <div className="flex-1">
@@ -189,12 +189,12 @@ const IGPosterModal = ({ patient, onClose }) => {
                 <p className="text-[10px] italic opacity-80 font-medium font-serif">"Setetes darah Anda, nyawa bagi sesama."</p>
                 <div className="flex items-center justify-center gap-6 w-full border-t border-white/10 pt-3">
                    <div className="flex items-center gap-2">
-                      <Instagram size={14} className="text-rose-400"/>
+                      <Instagram size={14} className="text-red-400"/>
                       <span className="text-[10px] font-bold tracking-wide text-white">@pmr_smanel</span>
                    </div>
                    <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
                    <div className="flex items-center gap-2">
-                      <Globe size={14} className="text-rose-400"/>
+                      <Globe size={14} className="text-red-400"/>
                       <span className="text-[10px] font-bold tracking-wide text-white">bloodlink.pmrsmanel.my.id</span>
                    </div>
                 </div>
@@ -206,7 +206,7 @@ const IGPosterModal = ({ patient, onClose }) => {
         <button 
           onClick={handleDownloadMock}
           disabled={downloading}
-          className="mt-8 w-full py-4 bg-white text-rose-600 rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-rose-50 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+          className="mt-8 w-full py-4 bg-white text-[#800000] rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-red-50 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
         >
           {downloading ? (
             <><Loader size={18} className="animate-spin" /> Memproses...</>
@@ -291,24 +291,25 @@ const Navbar = ({ setView, view, isLoggedIn }) => {
     { label: 'Home', value: 'home' }, { label: 'Butuh Donor', value: 'patient_list' }, { label: 'Data Relawan', value: 'volunteer_list' }, { label: 'Stok Darah', value: 'stock' }, { label: 'Edukasi', value: 'education' }
   ];
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-r from-rose-600 to-red-600 shadow-lg font-sans">
+    // NAVBAR MAROON GRADIENT
+    <nav className="sticky top-0 z-50 bg-gradient-to-r from-[#800000] to-red-900 shadow-lg font-sans">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center cursor-pointer group" onClick={() => setView('home')}>
-            <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center text-rose-600 mr-3 shadow-lg group-hover:scale-110 transition-transform"><Droplet fill="currentColor" size={20} /></div>
-            <div><h1 className="text-xl font-bold text-white tracking-tight">BloodL!nk</h1><p className="text-[10px] text-rose-100 font-bold tracking-widest uppercase">PMR SMANEL</p></div>
+            <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center text-[#800000] mr-3 shadow-lg group-hover:scale-110 transition-transform"><Droplet fill="currentColor" size={20} /></div>
+            <div><h1 className="text-xl font-bold text-white tracking-tight">BloodL!nk</h1><p className="text-[10px] text-red-100 font-bold tracking-widest uppercase">PMR SMANEL</p></div>
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (<button key={item.value} onClick={() => setView(item.value)} className={`font-semibold text-sm transition-all hover:-translate-y-0.5 ${view === item.value ? 'text-white underline decoration-2 underline-offset-4' : 'text-rose-100 hover:text-white'}`}>{item.label}</button>))}
-            <button onClick={() => setView(isLoggedIn ? 'admin' : 'login')} className="px-6 py-2.5 rounded-full bg-white text-rose-600 border border-white hover:bg-rose-50 transition-all text-xs font-bold uppercase tracking-wider">{isLoggedIn ? 'Dashboard' : 'Login Admin'}</button>
+            {navItems.map((item) => (<button key={item.value} onClick={() => setView(item.value)} className={`font-semibold text-sm transition-all hover:-translate-y-0.5 ${view === item.value ? 'text-white underline decoration-2 underline-offset-4' : 'text-red-100 hover:text-white'}`}>{item.label}</button>))}
+            <button onClick={() => setView(isLoggedIn ? 'admin' : 'login')} className="px-6 py-2.5 rounded-full bg-white text-[#800000] border border-white hover:bg-red-50 transition-all text-xs font-bold uppercase tracking-wider">{isLoggedIn ? 'Dashboard' : 'Login Admin'}</button>
           </div>
-          <div className="md:hidden"><button onClick={() => setIsOpen(!isOpen)} className="text-white hover:text-rose-100 transition-colors">{isOpen ? <X size={28} /> : <Menu size={28} />}</button></div>
+          <div className="md:hidden"><button onClick={() => setIsOpen(!isOpen)} className="text-white hover:text-red-100 transition-colors">{isOpen ? <X size={28} /> : <Menu size={28} />}</button></div>
         </div>
       </div>
       {isOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 absolute w-full shadow-xl animate-fadeIn">
           <div className="flex flex-col p-4 space-y-2">
-            {navItems.map((item) => (<button key={item.value} onClick={() => { setView(item.value); setIsOpen(false); }} className={`text-left font-semibold py-3 px-4 rounded-xl ${view === item.value ? 'bg-rose-50 text-rose-600' : 'text-slate-600 hover:bg-slate-50'}`}>{item.label}</button>))}
+            {navItems.map((item) => (<button key={item.value} onClick={() => { setView(item.value); setIsOpen(false); }} className={`text-left font-semibold py-3 px-4 rounded-xl ${view === item.value ? 'bg-red-50 text-[#800000]' : 'text-slate-600 hover:bg-slate-50'}`}>{item.label}</button>))}
             <button onClick={() => { setView(isLoggedIn ? 'admin' : 'login'); setIsOpen(false); }} className="text-left font-semibold py-3 px-4 text-slate-500 border-t border-slate-100 mt-2">{isLoggedIn ? 'Dashboard Admin' : 'Login Admin'}</button>
           </div>
         </div>
@@ -318,26 +319,26 @@ const Navbar = ({ setView, view, isLoggedIn }) => {
 };
 
 const Hero = ({ setView }) => (
-  <header className="bg-gradient-to-b from-rose-50 via-white to-white pt-24 pb-20 relative overflow-hidden">
-    <div className="absolute top-0 right-0 w-96 h-96 bg-rose-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+  <header className="bg-gradient-to-b from-red-50 via-white to-white pt-24 pb-20 relative overflow-hidden">
+    <div className="absolute top-0 right-0 w-96 h-96 bg-red-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
     <div className="absolute top-20 left-0 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl -translate-x-1/2"></div>
     
     <div className="container mx-auto px-4 relative z-10 text-center">
-      <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full bg-white border border-rose-100 text-rose-600 text-[10px] font-bold tracking-[0.2em] uppercase shadow-sm animate-fadeIn">
+      <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full bg-white border border-red-100 text-[#800000] text-[10px] font-bold tracking-[0.2em] uppercase shadow-sm animate-fadeIn">
         <Activity size={12} /> BLOODLINK PMR SMANEL
       </div>
       <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-8 leading-tight tracking-tight">
-        Karena Setiap Tetes <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-red-500">Sangat Berarti.</span>
+        Karena Setiap Tetes <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#800000] to-red-700">Sangat Berarti.</span>
       </h1>
       <p className="text-lg text-slate-500 mb-10 max-w-3xl mx-auto leading-relaxed">
         Selamat datang di <strong>BloodL!nk PmrSmanel</strong> ini adalah inisiatif digital karya “PMR SMANEL” dalam mengamalkan Tri Bakti PMR, aplikasi ini bertujuan untuk menjembatani pasien yang membutuhkan darah dengan relawan pendonor.
       </p>
       <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-        <button onClick={() => setView('patient_list')} className="w-full sm:w-auto px-8 py-4 bg-rose-600 text-white rounded-2xl shadow-xl shadow-rose-200 hover:bg-rose-700 hover:-translate-y-1 transition-all font-bold flex items-center justify-center gap-3 text-sm uppercase tracking-wide">
+        <button onClick={() => setView('patient_list')} className="w-full sm:w-auto px-8 py-4 bg-[#800000] text-white rounded-2xl shadow-xl shadow-red-200 hover:bg-red-900 hover:-translate-y-1 transition-all font-bold flex items-center justify-center gap-3 text-sm uppercase tracking-wide">
             <Search size={18} /> Lihat Pasien Butuh Darah
         </button>
-        <button onClick={() => setView('register')} className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl shadow-lg hover:shadow-xl hover:border-rose-200 transition-all font-bold flex items-center justify-center gap-3 text-sm uppercase tracking-wide group">
-            <UserPlus size={18} className="text-slate-400 group-hover:text-rose-500 transition-colors"/> Saya Ingin Donor Darah
+        <button onClick={() => setView('register')} className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl shadow-lg hover:shadow-xl hover:border-red-200 transition-all font-bold flex items-center justify-center gap-3 text-sm uppercase tracking-wide group">
+            <UserPlus size={18} className="text-slate-400 group-hover:text-[#800000] transition-colors"/> Saya Ingin Donor Darah
         </button>
       </div>
     </div>
@@ -354,25 +355,25 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-slate-900 mb-3">Stok Darah & Jadwal</h2>
-            <div className="h-1.5 w-20 bg-rose-500 mx-auto rounded-full"></div>
+            <div className="h-1.5 w-20 bg-[#800000] mx-auto rounded-full"></div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <div className="bg-slate-50 p-8 rounded-3xl border border-slate-100 shadow-sm">
             <h3 className="text-xl font-bold text-slate-800 mb-8 flex items-center justify-between">
-                <span className="flex items-center gap-3"><Droplet className="text-rose-500" fill="currentColor" /> Relawan Siap Donor</span>
-                <span className="text-xs bg-rose-100 text-rose-700 py-1.5 px-4 rounded-full font-bold">Total: {totalVolunteers}</span>
+                <span className="flex items-center gap-3"><Droplet className="text-[#800000]" fill="currentColor" /> Relawan Siap Donor</span>
+                <span className="text-xs bg-red-100 text-[#800000] py-1.5 px-4 rounded-full font-bold">Total: {totalVolunteers}</span>
             </h3>
             <div className="grid grid-cols-2 gap-5">
                 {Object.entries(bloodStock).map(([type, data]) => (
-                    <div key={type} className="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all hover:border-rose-300">
-                        <div className="absolute right-0 top-0 h-full w-2 bg-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div key={type} className="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all hover:border-red-300">
+                        <div className="absolute right-0 top-0 h-full w-2 bg-[#800000] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div className="flex justify-between items-center">
                             <div>
                                 <span className="text-5xl font-black text-slate-800">{type}</span>
                                 <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Golongan</div>
                             </div>
                             <div className="text-right">
-                                <div className="text-3xl font-black text-rose-500 mb-1">{data.positive + data.negative}</div>
+                                <div className="text-3xl font-black text-[#800000] mb-1">{data.positive + data.negative}</div>
                                 <div className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg inline-block">
                                     Rh+: {data.positive} <span className="text-slate-300 mx-0.5">|</span> Rh-: {data.negative}
                                 </div>
@@ -387,7 +388,7 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
           <div className="space-y-6">
             <div className="bg-white p-8 rounded-3xl border-2 border-slate-200 shadow-xl shadow-slate-100/50">
               <div className="mb-6">
-                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3"><Activity className="text-rose-500" /> Stok Darah PMI Kabupaten Lombok Timur</h3>
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3"><Activity className="text-[#800000]" /> Stok Darah PMI Kabupaten Lombok Timur</h3>
                   <div className="flex items-center gap-2 mt-2 ml-1">
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -405,20 +406,20 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
                             <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200">B</th>
                             <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200">O</th>
                             <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200">AB</th>
-                            <th className="px-4 py-3 text-center font-bold text-rose-600 border-b-2 border-l border-slate-200">Total</th>
+                            <th className="px-4 py-3 text-center font-bold text-[#800000] border-b-2 border-l border-slate-200">Total</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 bg-white">
                         {pmiStock.length > 0 ? pmiStock.map((row, i) => {
                             const total = (parseInt(row.A) || 0) + (parseInt(row.B) || 0) + (parseInt(row.O) || 0) + (parseInt(row.AB) || 0);
                             return (
-                                <tr key={i} className="hover:bg-rose-50/50 transition-colors">
+                                <tr key={i} className="hover:bg-red-50/50 transition-colors">
                                     <td className="px-5 py-3.5 font-bold text-slate-700">{row.product}</td>
                                     <td className="px-4 py-3 text-center text-slate-600 font-medium border-l border-slate-100">{row.A}</td>
                                     <td className="px-4 py-3 text-center text-slate-600 font-medium border-l border-slate-100">{row.B}</td>
                                     <td className="px-4 py-3 text-center text-slate-600 font-medium border-l border-slate-100">{row.O}</td>
                                     <td className="px-4 py-3 text-center text-slate-600 font-medium border-l border-slate-100">{row.AB}</td>
-                                    <td className="px-4 py-3 text-center font-black text-rose-600 border-l border-slate-100 bg-rose-50/30">{total}</td>
+                                    <td className="px-4 py-3 text-center font-black text-[#800000] border-l border-slate-100 bg-red-50/30">{total}</td>
                                 </tr>
                             );
                         }) : <tr><td colSpan="6" className="p-6 text-center text-slate-400 text-xs italic">Memuat data...</td></tr>}
@@ -429,11 +430,11 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
             
             <div className="bg-slate-800 p-8 rounded-3xl text-white shadow-lg shadow-slate-300 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-              <h3 className="text-lg font-bold mb-6 flex items-center gap-3 relative z-10"><Calendar className="text-rose-400" /> Jadwal Mobil Unit</h3>
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-3 relative z-10"><Calendar className="text-red-400" /> Jadwal Mobil Unit</h3>
               <div className="space-y-4 relative z-10">
                 {mobileUnit.length > 0 ? mobileUnit.map((item, i) => (
                   <div key={i} className="flex items-start gap-4 p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
-                    <div className="bg-rose-500/20 p-2 rounded-lg text-rose-400"><MapPin size={18}/></div>
+                    <div className="bg-red-900/20 p-2 rounded-lg text-red-400"><MapPin size={18}/></div>
                     <div><p className="font-bold text-sm">{item.location}</p><p className="text-xs text-slate-400 mt-1 font-medium">{formatDateIndo(item.date)} • {item.time}</p></div>
                   </div>
                 )) : <div className="text-center py-4 border border-dashed border-white/10 rounded-xl"><p className="text-slate-400 text-sm italic">Belum ada jadwal aktif.</p></div>}
@@ -483,7 +484,7 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
   };
 
   return (
-    <section className="py-20 bg-rose-50/50 min-h-screen">
+    <section className="py-20 bg-red-50/50 min-h-screen">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-slate-800 mb-2">Pasien Butuh Darah</h2>
@@ -504,12 +505,12 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
         ) : (
           <div className="flex flex-col items-center gap-6 mb-12">
             <div className="relative w-full max-w-lg shadow-sm">
-                <input type="text" placeholder="Cari nama pasien atau rumah sakit..." className="w-full p-4 pl-12 rounded-2xl border-none shadow-lg shadow-slate-200/50 focus:ring-4 focus:ring-rose-100 text-slate-700 font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <input type="text" placeholder="Cari nama pasien atau rumah sakit..." className="w-full p-4 pl-12 rounded-2xl border-none shadow-lg shadow-slate-200/50 focus:ring-4 focus:ring-red-100 text-slate-700 font-medium" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 <Search className="absolute left-4 top-4 text-slate-400" size={20} />
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
                 {['ALL', 'A', 'B', 'AB', 'O'].map(type => (
-                    <button key={type} onClick={() => setFilterBlood(type)} className={`px-5 py-2 rounded-full font-bold text-sm transition-all ${filterBlood === type ? 'bg-rose-600 text-white shadow-lg shadow-rose-200' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200'}`}>{type === 'ALL' ? 'Semua' : type}</button>
+                    <button key={type} onClick={() => setFilterBlood(type)} className={`px-5 py-2 rounded-full font-bold text-sm transition-all ${filterBlood === type ? 'bg-[#800000] text-white shadow-lg shadow-red-200' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200'}`}>{type === 'ALL' ? 'Semua' : type}</button>
                 ))}
             </div>
           </div>
@@ -517,10 +518,10 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {sortedRequests.map(req => (
-              <div key={req.id} className={`bg-white p-7 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative group hover:-translate-y-1 transition-transform duration-300 ${sharedId ? 'ring-4 ring-rose-100 scale-105' : ''}`}>
+              <div key={req.id} className={`bg-white p-7 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative group hover:-translate-y-1 transition-transform duration-300 ${sharedId ? 'ring-4 ring-red-100 scale-105' : ''}`}>
                 <div className="flex justify-between items-start mb-6">
                     <div className="flex items-center gap-4">
-                        <div className="bg-gradient-to-br from-rose-50 to-red-100 text-rose-600 w-16 h-16 rounded-2xl flex flex-col items-center justify-center border border-rose-100 shadow-inner">
+                        <div className="bg-gradient-to-br from-red-50 to-red-100 text-[#800000] w-16 h-16 rounded-2xl flex flex-col items-center justify-center border border-red-100 shadow-inner">
                             <span className="text-2xl font-bold leading-none">{req.bloodType}</span>
                             <span className="text-[10px] font-bold mt-0.5 opacity-70">{safeText(req.rhesus)}</span>
                         </div>
@@ -531,31 +532,31 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
                             </div>
                         </div>
                     </div>
-                    <div className="bg-rose-50 text-rose-600 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-rose-100 animate-pulse">Urgent</div>
+                    <div className="bg-red-50 text-[#800000] px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-red-100 animate-pulse">Urgent</div>
                 </div>
 
                 <div className="space-y-4 mb-8 bg-slate-50/50 p-5 rounded-2xl border border-slate-100">
                     <div className="flex items-start gap-3">
-                        <MapPin size={18} className="text-rose-400 mt-0.5 shrink-0" />
+                        <MapPin size={18} className="text-[#800000] mt-0.5 shrink-0" />
                         <div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Lokasi / RS</p><p className="text-sm font-semibold text-slate-700 leading-snug">{req.hospital}</p></div>
                     </div>
                     <div className="flex items-start gap-3">
-                        <Droplet size={18} className="text-rose-400 mt-0.5 shrink-0" />
+                        <Droplet size={18} className="text-[#800000] mt-0.5 shrink-0" />
                         <div><p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Dibutuhkan</p><p className="text-sm font-semibold text-slate-700">{req.amount} Kantong</p></div>
                     </div>
                     <div className="flex items-start gap-3">
-                        <Phone size={18} className="text-rose-400 mt-0.5 shrink-0" />
+                        <Phone size={18} className="text-[#800000] mt-0.5 shrink-0" />
                         <div className="w-full">
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Kontak Keluarga</p>
                             <div className="flex items-center justify-between">
                                 <p className="text-base font-bold text-slate-800 tracking-wide">{req.contact}</p>
-                                <button onClick={() => copyToClipboard(req.contact)} className="text-slate-300 hover:text-rose-500 transition-colors"><Copy size={16} /></button>
+                                <button onClick={() => copyToClipboard(req.contact)} className="text-slate-300 hover:text-[#800000] transition-colors"><Copy size={16} /></button>
                             </div>
                             {req.contact2 && (
                                 <div className="mt-2 pt-2 border-t border-dashed border-slate-200">
                                     <div className="flex items-center justify-between">
                                         <p className="text-sm font-medium text-slate-500">{req.contact2} <span className="text-[10px] bg-slate-100 px-1.5 rounded text-slate-400">Alt</span></p>
-                                        <button onClick={() => copyToClipboard(req.contact2)} className="text-slate-300 hover:text-rose-500 transition-colors"><Copy size={14} /></button>
+                                        <button onClick={() => copyToClipboard(req.contact2)} className="text-slate-300 hover:text-[#800000] transition-colors"><Copy size={14} /></button>
                                     </div>
                                 </div>
                             )}
@@ -566,7 +567,7 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
                 <div className="grid grid-cols-5 gap-3">
                     <a href={getWALink(req.contact, `Halo, saya ingin membantu donor untuk pasien ${req.patient}.`)} target="_blank" rel="noreferrer" className="col-span-3 bg-emerald-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-xs uppercase tracking-wide shadow-lg shadow-emerald-200 hover:bg-emerald-600 transition-all hover:-translate-y-0.5"><MessageCircle size={18} /> Chat WA</a>
                     <button onClick={() => handleShare(req)} className="col-span-1 bg-white text-blue-500 border border-blue-100 rounded-xl flex justify-center items-center hover:bg-blue-50 transition-all shadow-sm"><Share2 size={20}/></button>
-                    <button onClick={() => setPosterData(req)} className="col-span-1 bg-white text-rose-500 border border-rose-100 rounded-xl flex justify-center items-center hover:bg-rose-50 transition-all shadow-sm"><Instagram size={20}/></button>
+                    <button onClick={() => setPosterData(req)} className="col-span-1 bg-white text-[#800000] border border-red-100 rounded-xl flex justify-center items-center hover:bg-red-50 transition-all shadow-sm"><Instagram size={20}/></button>
                 </div>
               </div>
             ))}
@@ -574,7 +575,7 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
         {/* ADDED CTA BUTTON HERE */}
         <div className="mt-16 text-center">
           <p className="mb-4 text-slate-500 font-medium">Anda atau kerabat butuh darah segera?</p>
-          <button onClick={() => setView('search')} className="px-8 py-3.5 bg-[#C0392B] text-white rounded-xl font-bold shadow-lg shadow-rose-200 hover:bg-rose-700 transition-all hover:-translate-y-1">Ajukan Permohonan Darah</button>
+          <button onClick={() => setView('search')} className="px-8 py-3.5 bg-[#800000] text-white rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-900 transition-all hover:-translate-y-1">Ajukan Permohonan Darah</button>
         </div>
       </div>
       {posterData && <IGPosterModal patient={posterData} onClose={() => setPosterData(null)} />}
@@ -585,8 +586,8 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
 const VolunteerForm = ({ onSubmit, isLoading }) => {
     const [form, setForm] = useState({ name: '', bloodType: 'A', rhesus: '+', phone: '', address: '', lastDonorDate: '' });
     return (
-      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-2xl mx-auto my-10 border-t-4 border-[#C0392B]">
-        <h2 className="text-2xl font-bold text-[#2C3E50] mb-6 flex items-center gap-2"><UserPlus className="text-[#2C3E50]" /> Form Pendaftaran Relawan</h2>
+      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-2xl mx-auto my-10 border-t-4 border-[#800000]">
+        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2"><UserPlus className="text-[#800000]" /> Form Pendaftaran Relawan</h2>
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-4">
           <div><label className="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label><input required type="text" className="w-full border rounded-lg p-2" value={form.name} onChange={e => setForm({...form, name: e.target.value})} /></div>
           <div className="grid grid-cols-2 gap-4">
@@ -608,7 +609,7 @@ const VolunteerForm = ({ onSubmit, isLoading }) => {
              <p className="text-sm text-blue-800 leading-snug">Dengan mendaftar, saya menyatakan <strong>bersedia dihubungi sewaktu-waktu</strong> jika ada pasien yang membutuhkan golongan darah saya.</p>
           </div>
   
-          <button disabled={isLoading} type="submit" className="w-full bg-[#2C3E50] text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors disabled:bg-gray-400">
+          <button disabled={isLoading} type="submit" className="w-full bg-[#800000] text-white font-bold py-3 rounded-lg hover:bg-red-900 transition-colors disabled:bg-gray-400">
              {isLoading ? 'Menyimpan...' : 'Daftar Jadi Relawan'}
           </button>
         </form>
@@ -619,8 +620,8 @@ const VolunteerForm = ({ onSubmit, isLoading }) => {
 const RequestForm = ({ onSubmit, isLoading }) => {
     const [form, setForm] = useState({ patient: '', age: '', hospital: '', bloodType: 'A', rhesus: '+', amount: '', contact: '', contact2: '' });
     return (
-      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-2xl mx-auto my-10 border-t-4 border-[#C0392B]">
-        <h2 className="text-2xl font-bold text-[#2C3E50] mb-6 flex items-center gap-2"><AlertCircle className="text-[#C0392B]" /> Form Permohonan Darah</h2>
+      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-2xl mx-auto my-10 border-t-4 border-[#800000]">
+        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2"><AlertCircle className="text-[#800000]" /> Form Permohonan Darah</h2>
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label className="block text-sm font-semibold text-gray-700 mb-1">Nama Pasien</label><input required type="text" className="w-full border rounded-lg p-2" placeholder="Nama Lengkap" value={form.patient} onChange={e => setForm({...form, patient: e.target.value})} /></div>
@@ -643,7 +644,7 @@ const RequestForm = ({ onSubmit, isLoading }) => {
               <div><label className="block text-sm font-semibold text-gray-700 mb-1">HP Alternatif / Keluarga Lain (Opsional)</label><input type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.contact2} onChange={e => setForm({...form, contact2: e.target.value})} /></div>
           </div>
   
-          <button disabled={isLoading} type="submit" className="w-full bg-[#C0392B] text-white font-bold py-3 rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400">
+          <button disabled={isLoading} type="submit" className="w-full bg-[#800000] text-white font-bold py-3 rounded-lg hover:bg-red-900 transition-colors disabled:bg-gray-400">
             {isLoading ? 'Mengirim Data...' : 'Kirim Permohonan'}
           </button>
         </form>
@@ -684,7 +685,7 @@ const VolunteerList = ({ volunteers, setView }) => {
                 <div className="w-full border-t border-slate-100 pt-5 grid grid-cols-2 gap-4 text-sm mb-6">
                     <div className="text-center">
                         <p className="text-[10px] text-slate-400 font-bold uppercase">Golongan</p>
-                        <p className="text-xl font-bold text-rose-500">{vol.bloodType}</p>
+                        <p className="text-xl font-bold text-[#800000]">{vol.bloodType}</p>
                     </div>
                     <div className="text-center border-l border-slate-100">
                         <p className="text-[10px] text-slate-400 font-bold uppercase">Rhesus</p>
@@ -708,11 +709,11 @@ const VolunteerList = ({ volunteers, setView }) => {
           })}
         </div>
         <div className="mt-16 text-center bg-slate-900 rounded-[2.5rem] p-12 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/20 rounded-full blur-3xl"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-red-900/20 rounded-full blur-3xl"></div>
             <div className="relative z-10">
                 <h3 className="text-2xl font-bold text-white mb-3">Mari Berbagi Kehidupan</h3>
                 <p className="text-slate-400 mb-8 max-w-xl mx-auto">Bergabunglah menjadi bagian dari keluarga besar relawan donor darah PMR SMAN 1 Aikmel.</p>
-                <button onClick={() => setView('register')} className="px-8 py-3.5 bg-rose-600 text-white rounded-xl font-bold shadow-lg shadow-rose-900/50 hover:bg-rose-500 transition-all hover:-translate-y-1">Daftar Sekarang</button>
+                <button onClick={() => setView('register')} className="px-8 py-3.5 bg-[#800000] text-white rounded-xl font-bold shadow-lg shadow-red-900/50 hover:bg-red-900 transition-all hover:-translate-y-1">Daftar Sekarang</button>
             </div>
         </div>
       </div>
@@ -738,7 +739,7 @@ const AboutStats = ({ volunteers, requests }) => {
         <div className="text-center max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-black text-slate-800 mb-6 leading-tight">
             Misi Kemanusiaan <br/>
-            <span className="text-[#C0392B] text-5xl md:text-6xl">PMR SMANEL</span>
+            <span className="text-[#800000] text-5xl md:text-6xl">PMR SMANEL</span>
           </h2>
           <div className="text-slate-600 leading-relaxed mb-8 space-y-6 text-base">
             <p>
@@ -748,7 +749,7 @@ const AboutStats = ({ volunteers, requests }) => {
             {/* VISI MISI GRID */}
             <div className="grid md:grid-cols-2 gap-6 text-left">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-full">
-                  <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2 text-base"><Target className="text-rose-500" size={18}/> Visi Kami</h4>
+                  <h4 className="font-bold text-slate-800 mb-2 flex items-center gap-2 text-base"><Target className="text-[#800000]" size={18}/> Visi Kami</h4>
                   <p className="text-sm text-slate-500">Menjadi pusat informasi dan pangkalan data donor darah berbasis sekolah yang responsif, akurat, dan terpercaya guna mewujudkan generasi peduli kemanusiaan.</p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-full">
@@ -756,8 +757,7 @@ const AboutStats = ({ volunteers, requests }) => {
                   <ul className="space-y-2 text-sm text-slate-500">
                     <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Digitalisasi Data:</strong> Mengelola data golongan darah warga sekolah dan masyarakat secara terstruktur dan aman.</span></li>
                     <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Respons Cepat:</strong> Mempercepat proses pencarian pendonor di saat-saat darurat (urgent) melalui teknologi.</span></li>
-                    <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Edukasi Masif:</strong> Meningkatkan kesadaran akan pentingnya donor darah bagi kesehatan dan nilai kemanusiaan.</span></li>
-                    <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Sinergi Kemanusiaan:</strong> Membangun kolaborasi solid antara sekolah, Unit Transfusi Darah (UTD), dan masyarakat luas.</span></li>
+                    <li className="flex gap-2"><div className="w-1.5 h-1.5 bg-slate-300 rounded-full mt-1.5 shrink-0"></div><span><strong>Edukasi & Sinergi:</strong> Meningkatkan kesadaran dan kolaborasi dengan UTD.</span></li>
                   </ul>
                 </div>
             </div>
@@ -766,15 +766,15 @@ const AboutStats = ({ volunteers, requests }) => {
 
         {/* MIDDLE SECTION: IMAGE (LARGE & CENTERED) */}
         <div className="w-full max-w-5xl mx-auto relative">
-             <div className="absolute inset-0 bg-rose-200 rounded-[3rem] rotate-1 opacity-50 blur-sm"></div>
+             <div className="absolute inset-0 bg-red-200 rounded-[3rem] rotate-1 opacity-50 blur-sm"></div>
              <img src="https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&q=80&w=1200" alt="PMR Activity" className="relative rounded-[3rem] shadow-2xl w-full h-[400px] md:h-[500px] object-cover border-8 border-white" />
         </div>
 
         {/* BOTTOM SECTION: STATS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto">
-            <div className="text-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:-translate-y-1 transition-transform"><div className="text-4xl font-bold text-rose-500 mb-1">{activeVolunteerCount}</div><div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Relawan Aktif</div></div>
-            <div className="text-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:-translate-y-1 transition-transform"><div className="text-4xl font-bold text-rose-500 mb-1">{fulfilledBagsCount}</div><div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kantong Tersalur</div></div>
-            <div className="text-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:-translate-y-1 transition-transform"><div className="text-4xl font-bold text-rose-500 mb-1">24/7</div><div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Layanan Siap Siaga</div></div>
+            <div className="text-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:-translate-y-1 transition-transform"><div className="text-4xl font-bold text-[#800000] mb-1">{activeVolunteerCount}</div><div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Relawan Aktif</div></div>
+            <div className="text-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:-translate-y-1 transition-transform"><div className="text-4xl font-bold text-[#800000] mb-1">{fulfilledBagsCount}</div><div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kantong Tersalur</div></div>
+            <div className="text-center p-6 bg-white rounded-2xl border border-slate-100 shadow-sm hover:-translate-y-1 transition-transform"><div className="text-4xl font-bold text-[#800000] mb-1">24/7</div><div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Layanan Siap Siaga</div></div>
         </div>
       </div>
     </section>
@@ -793,7 +793,7 @@ const Education = ({ articles }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">{articles.map((article) => (
             <div key={article.id} className="bg-slate-50 rounded-[2rem] overflow-hidden hover:shadow-xl transition-all group border border-slate-100 cursor-pointer" onClick={() => setSelectedArticle(article)}>
               <div className="h-56 overflow-hidden"><img src={article.image} alt={article.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /></div>
-              <div className="p-8"><h3 className="text-lg font-bold text-slate-800 mb-3 group-hover:text-rose-600 transition-colors">{article.title}</h3><p className="text-slate-500 text-sm mb-6 line-clamp-2">{article.excerpt}</p><button className="text-rose-600 font-bold text-xs uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">Baca Selengkapnya <ChevronRight size={14} /></button></div>
+              <div className="p-8"><h3 className="text-lg font-bold text-slate-800 mb-3 group-hover:text-[#800000] transition-colors">{article.title}</h3><p className="text-slate-500 text-sm mb-6 line-clamp-2">{article.excerpt}</p><button className="text-[#800000] font-bold text-xs uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">Baca Selengkapnya <ChevronRight size={14} /></button></div>
             </div>
           ))}</div>
       </div>
@@ -803,12 +803,12 @@ const Education = ({ articles }) => {
             <button onClick={() => setSelectedArticle(null)} className="absolute top-6 right-6 z-10 bg-white/50 p-2.5 rounded-full hover:bg-white transition-all backdrop-blur-sm"><X size={20} className="text-slate-800"/></button>
             <div className="h-72 w-full overflow-hidden"><img src={selectedArticle.image} alt={selectedArticle.title} className="w-full h-full object-cover" /></div>
             <div className="p-10">
-                <div className="inline-block px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-bold uppercase tracking-widest mb-4">Artikel Kesehatan</div>
+                <div className="inline-block px-3 py-1 bg-red-50 text-[#800000] rounded-lg text-[10px] font-bold uppercase tracking-widest mb-4">Artikel Kesehatan</div>
                 <h2 className="text-3xl font-bold text-slate-900 mb-8 leading-tight">{selectedArticle.title}</h2>
                 <ul className="space-y-4 text-slate-600 leading-relaxed text-lg">
                     {selectedArticle.content.map((item, i) => (
                         <li key={i} className="flex gap-4 items-start">
-                            <div className="w-6 h-6 bg-rose-100 rounded-full flex items-center justify-center text-rose-600 font-bold text-xs mt-0.5 shrink-0">{i+1}</div>
+                            <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center text-[#800000] font-bold text-xs mt-0.5 shrink-0">{i+1}</div>
                             <span>{item}</span>
                         </li>
                     ))}
@@ -825,11 +825,11 @@ const Footer = ({ setView }) => (
   <footer className="bg-slate-900 text-white py-16 border-t border-white/5">
     <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
       <div>
-        <div className="flex items-center gap-3 mb-6"><div className="h-10 w-10 bg-gradient-to-br from-rose-500 to-red-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-rose-900/20"><Droplet fill="currentColor" size={20} /></div><h3 className="text-2xl font-bold tracking-tight">BloodL!nk</h3></div>
+        <div className="flex items-center gap-3 mb-6"><div className="h-10 w-10 bg-gradient-to-br from-[#800000] to-red-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-red-900/20"><Droplet fill="currentColor" size={20} /></div><h3 className="text-2xl font-bold tracking-tight">BloodL!nk</h3></div>
         <p className="text-slate-400 text-sm leading-relaxed">“Bergerak Nyata, Berbagi Kehidupan.” Platform inovasi PMR SMAN 1 Aikmel.</p>
       </div>
-      <div><h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Navigasi</h3><ul className="space-y-4 text-sm font-medium text-slate-300"><li><button onClick={() => setView('patient_list')} className="hover:text-rose-400 transition-colors">Butuh Donor</button></li><li><button onClick={() => setView('volunteer_list')} className="hover:text-rose-400 transition-colors">Data Relawan</button></li><li><button onClick={() => setView('stock')} className="hover:text-rose-400 transition-colors">Stok Darah</button></li></ul></div>
-      <div><h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Markas</h3><ul className="space-y-4 text-sm text-slate-300"><li className="flex items-start gap-3"><MapPin size={18} className="text-rose-500 mt-0.5 shrink-0"/><span>Jl. Pendidikan No.35, Aikmel, Kec. Aikmel, Kabupaten Lombok Timur, Nusa Tenggara Bar. 83653</span></li><li className="flex items-center gap-3"><Phone size={18} className="text-rose-500"/> +62 818-0332-4919</li></ul></div>
+      <div><h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Navigasi</h3><ul className="space-y-4 text-sm font-medium text-slate-300"><li><button onClick={() => setView('patient_list')} className="hover:text-red-400 transition-colors">Butuh Donor</button></li><li><button onClick={() => setView('volunteer_list')} className="hover:text-red-400 transition-colors">Data Relawan</button></li><li><button onClick={() => setView('stock')} className="hover:text-red-400 transition-colors">Stok Darah</button></li></ul></div>
+      <div><h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Markas</h3><ul className="space-y-4 text-sm text-slate-300"><li className="flex items-start gap-3"><MapPin size={18} className="text-[#800000] mt-0.5 shrink-0"/><span>Jl. Pendidikan No.35, Aikmel, Kec. Aikmel, Kabupaten Lombok Timur, Nusa Tenggara Bar. 83653</span></li><li className="flex items-center gap-3"><Phone size={18} className="text-[#800000]"/> +62 818-0332-4919</li></ul></div>
       <div><h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Sosial Media</h3><div className="flex gap-4">
         {[
             { icon: <Instagram size={20} />, href: "https://www.instagram.com/pmr_smanel/" },
@@ -837,7 +837,7 @@ const Footer = ({ setView }) => (
             { icon: <Video size={20} />, href: "https://www.tiktok.com/@pmrsmanel" },
             { icon: <Youtube size={20} />, href: "https://www.youtube.com/@pmrsmanel4782" }
         ].map((social, i) => (
-            <a key={i} href={social.href} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all">{social.icon}</a>
+            <a key={i} href={social.href} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#800000] hover:text-white transition-all">{social.icon}</a>
         ))}
       </div></div>
     </div>
