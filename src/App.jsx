@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 
 // PERLU DIINSTALL: npm install html2canvas
-import html2canvas from 'html2canvas'; // DIKOMENTARI AGAR PREVIEW AMAN
+// import html2canvas from 'html2canvas'; // DIKOMENTARI AGAR PREVIEW AMAN
 
 // --- KONFIGURASI DATABASE ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
@@ -139,13 +139,13 @@ const IGPosterModal = ({ patient, onClose }) => {
 
           {/* Body Content */}
           <div className="px-7 py-8 bg-white">
-            {/* Golongan Darah */}
+            {/* Golongan Darah - Diperbaiki agar tidak overlap */}
             <div className="flex flex-col items-center justify-center mb-10">
-               <div className="flex items-start justify-center gap-1 mb-3 transform scale-110">
-                    <span className="text-[100px] font-bold text-slate-800 leading-[0.8] tracking-tighter">{patient.bloodType}</span>
-                    <span className="text-5xl font-bold text-[#800000] mt-2">{safeText(patient.rhesus)}</span>
+               <div className="flex items-start justify-center gap-2 mb-4"> {/* Removed scale-110 to reduce size */}
+                    <span className="text-8xl font-black text-slate-800 leading-none tracking-tighter">{patient.bloodType}</span> {/* Reduced to 8xl */}
+                    <span className="text-4xl font-bold text-[#800000] mt-2">{safeText(patient.rhesus)}</span>
                </div>
-               <div className="bg-red-50 text-[#800000] px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest border border-red-100">
+               <div className="bg-red-50 text-[#800000] px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-widest border border-red-100">
                   Dibutuhkan {patient.amount} Kantong
                </div>
             </div>
@@ -363,21 +363,28 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
                 <span className="flex items-center gap-3"><Droplet className="text-[#800000]" fill="currentColor" /> Relawan Siap Donor</span>
                 <span className="text-xs bg-red-100 text-[#800000] py-1.5 px-4 rounded-full font-bold">Total: {totalVolunteers}</span>
             </h3>
-            <div className="grid grid-cols-2 gap-5">
+            {/* GRID RELAWAN: Diubah agar tidak overlap */}
+            <div className="grid grid-cols-2 gap-4">
                 {Object.entries(bloodStock).map(([type, data]) => (
-                    <div key={type} className="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all hover:border-red-300">
-                        <div className="absolute right-0 top-0 h-full w-2 bg-[#800000] opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <span className="text-5xl font-black text-slate-800">{type}</span>
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Golongan</div>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-3xl font-black text-[#800000] mb-1">{data.positive + data.negative}</div>
-                                <div className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg inline-block">
-                                    Rh+: {data.positive} <span className="text-slate-300 mx-0.5">|</span> Rh-: {data.negative}
-                                </div>
-                            </div>
+                    <div key={type} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-red-300 transition-all">
+                        {/* Aksen atas */}
+                        <div className="absolute top-0 left-0 w-full h-1 bg-[#800000]"></div>
+                        
+                        <div className="mb-3 mt-1">
+                            <span className="text-5xl font-black text-slate-800">{type}</span>
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider -mt-1">Golongan</div>
+                        </div>
+
+                        {/* Rincian Rh dalam box terpisah */}
+                        <div className="w-full flex justify-between gap-2 px-2">
+                             <div className="flex flex-col items-center flex-1 bg-slate-50 rounded p-1 border border-slate-100">
+                                 <span className="text-[9px] font-bold text-slate-400 uppercase">Rh+</span>
+                                 <span className="text-lg font-black text-[#800000]">{data.positive}</span>
+                             </div>
+                             <div className="flex flex-col items-center flex-1 bg-slate-50 rounded p-1 border border-slate-100">
+                                 <span className="text-[9px] font-bold text-slate-400 uppercase">Rh-</span>
+                                 <span className="text-lg font-black text-[#800000]">{data.negative}</span>
+                             </div>
                         </div>
                     </div>
                 ))}
@@ -446,6 +453,11 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
     </section>
   );
 };
+
+// ... PatientList, VolunteerForm, RequestForm, VolunteerList, AboutStats, Education, Footer, AdminPanel, Login, App (sama seperti sebelumnya) ...
+// (Untuk menghemat ruang, saya hanya menampilkan bagian StockDashboard yang diubah. Komponen lain tetap sama dan perlu disertakan dalam file penuh)
+
+// KODE LENGKAP DI BAWAH INI MENGGABUNGKAN SEMUA PERUBAHAN:
 
 const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) => {
   const [searchTerm, setSearchTerm] = useState('');
