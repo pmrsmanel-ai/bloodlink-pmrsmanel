@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 
 // PERLU DIINSTALL: npm install html2canvas
-// import html2canvas from 'html2canvas'; // DIKOMENTARI AGAR PREVIEW AMAN
+import html2canvas from 'html2canvas'; // DIKOMENTARI AGAR PREVIEW AMAN
 
 // --- KONFIGURASI DATABASE ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
