@@ -7,14 +7,20 @@ import {
   Share2, AlertTriangle, ArrowLeft, Camera, Download, Globe, Copy, Target, Rocket
 } from 'lucide-react';
 
-// --- INSTRUKSI: HAPUS KOMENTAR PADA IMPORT INI SAAT DEPLOY KE PRODUCTION ---
-import html2canvas from 'html2canvas'; 
+// ============================================================================
+// [PENTING] BAGIAN INI HARUS DIKOMENTARI SAAT DI PRATINJAU (PREVIEW)
+// ============================================================================
+// Agar fitur download berjalan di website asli (Netlify/Vercel), lakukan:
+// 1. Jalankan: npm install html2canvas
+// 2. Hapus tanda // pada baris di bawah ini:
+// import html2canvas from 'html2canvas'; 
+// ============================================================================
 
 // --- KONFIGURASI DATABASE ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
 
 // ============================================================================
-// 1. DATA INITIAL (KOSONG - MENUNGGU DATABASE)
+// 1. DATA INITIAL
 // ============================================================================
 const FALLBACK_DATA = {
   bloodStock: {
@@ -23,10 +29,10 @@ const FALLBACK_DATA = {
     AB: { positive: 0, negative: 0 },
     O: { positive: 0, negative: 0 },
   },
-  pmiStock: [], // Data akan diisi dari Database
-  mobileUnit: [], // Data akan diisi dari Database
-  volunteers: [], // Data akan diisi dari Database
-  requests: [] // Data akan diisi dari Database
+  pmiStock: [],
+  mobileUnit: [],
+  volunteers: [],
+  requests: []
 };
 
 const ARTICLES = [
@@ -76,17 +82,12 @@ const sendDataToSheet = async (sheetName, data, action = 'write') => {
 };
 
 // ============================================================================
-// 3. KOMPONEN UI
+// 3. KOMPONEN UI UTILS
 // ============================================================================
 
 const Toast = ({ message, type, onClose }) => {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 3000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
+  useEffect(() => { const timer = setTimeout(onClose, 3000); return () => clearTimeout(timer); }, [onClose]);
   const bgColors = { success: 'bg-green-600', error: 'bg-[#800000]', info: 'bg-blue-600' };
-
   return (
     <div className={`fixed top-6 right-6 z-[99999] ${bgColors[type] || bgColors.info} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-slideIn backdrop-blur-sm bg-opacity-95 border border-white/10 max-w-[90vw]`}>
       {type === 'success' && <CheckCircle size={24} className="text-emerald-100 shrink-0" />}
@@ -103,16 +104,12 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel, isLoading }
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fadeIn">
       <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform scale-100 transition-all border border-slate-100">
         <div className="flex flex-col items-center text-center">
-          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-[#800000] mb-6 shadow-sm">
-            <AlertTriangle size={36} strokeWidth={1.5} />
-          </div>
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center text-[#800000] mb-6 shadow-sm"><AlertTriangle size={36} strokeWidth={1.5} /></div>
           <h3 className="text-2xl font-bold text-slate-800 mb-3">{title}</h3>
           <p className="text-slate-500 text-sm leading-relaxed mb-8">{message}</p>
           <div className="flex gap-3 w-full">
             <button onClick={onCancel} disabled={isLoading} className="flex-1 py-3.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">Batal</button>
-            <button onClick={onConfirm} disabled={isLoading} className="flex-1 py-3.5 bg-[#800000] text-white rounded-xl font-bold text-sm hover:bg-red-900 hover:shadow-lg hover:shadow-red-200 transition-all flex items-center justify-center gap-2">
-              {isLoading ? <Loader size={18} className="animate-spin" /> : 'Ya, Hapus'}
-            </button>
+            <button onClick={onConfirm} disabled={isLoading} className="flex-1 py-3.5 bg-[#800000] text-white rounded-xl font-bold text-sm hover:bg-red-900 hover:shadow-lg hover:shadow-red-200 transition-all flex items-center justify-center gap-2">{isLoading ? <Loader size={18} className="animate-spin" /> : 'Ya, Hapus'}</button>
           </div>
         </div>
       </div>
@@ -125,12 +122,9 @@ const IGPosterModal = ({ patient, onClose }) => {
   const [downloading, setDownloading] = useState(false);
   const [libLoaded, setLibLoaded] = useState(false);
 
-  // --- AKTIVASI OTOMATIS: Load library dari CDN ---
+  // Auto load html2canvas from CDN for preview environment
   useEffect(() => {
-    if (window.html2canvas) {
-      setLibLoaded(true);
-      return;
-    }
+    if (window.html2canvas) { setLibLoaded(true); return; }
     const script = document.createElement("script");
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
     script.async = true;
@@ -139,37 +133,20 @@ const IGPosterModal = ({ patient, onClose }) => {
   }, []);
 
   const handleDownload = async () => {
-    if (!posterRef.current || !window.html2canvas) {
-        alert("Komponen belum siap. Mohon tunggu sebentar.");
-        return;
-    }
+    if (!posterRef.current || !window.html2canvas) { alert("Komponen sedang dimuat, coba lagi sebentar lagi."); return; }
     setDownloading(true);
-
     try {
-      // Tunggu font & rendering
       await document.fonts.ready;
       window.scrollTo(0, 0); 
-      await new Promise((resolve) => setTimeout(resolve, 800)); // Delay aman
-
-      const canvas = await window.html2canvas(posterRef.current, { 
-        scale: 3, // Kualitas HD
-        useCORS: true, 
-        backgroundColor: "#ffffff", // Wajib putih agar tidak transparan
-        scrollX: 0,
-        scrollY: 0
-      });
-
+      await new Promise(r => setTimeout(r, 1000)); // Delay aman untuk render font
+      const canvas = await window.html2canvas(posterRef.current, { scale: 3, useCORS: true, backgroundColor: null, scrollX: 0, scrollY: 0 });
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.href = image;
       link.download = `BloodLink-${patient.patient.replace(/\s+/g, '-')}.png`;
       link.click();
-    } catch(e) { 
-        console.error(e); 
-        alert("Gagal membuat gambar.");
-    } finally { 
-        setDownloading(false); 
-    }
+    } catch(e) { console.error(e); alert("Gagal membuat gambar."); } 
+    finally { setDownloading(false); }
   };
 
   if (!patient) return null;
@@ -177,115 +154,89 @@ const IGPosterModal = ({ patient, onClose }) => {
   return (
     <div className="fixed inset-0 z-[99999] flex items-start justify-center bg-slate-900/90 backdrop-blur-md p-4 pt-10 animate-fadeIn overflow-y-auto">
       <div className="relative w-full max-w-[400px] flex flex-col items-center">
-        
-        <button onClick={onClose} className="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full mb-8 flex items-center gap-2 font-semibold backdrop-blur-md transition-all text-sm border border-white/10 shadow-lg">
-          <X size={18} /> Tutup Preview
-        </button>
+        <button onClick={onClose} className="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full mb-8 flex items-center gap-2 font-semibold backdrop-blur-md transition-all text-sm border border-white/10 shadow-lg"><X size={18} /> Tutup Preview</button>
 
-        {/* POSTER CARD - DESIGN BERSIH / PUTIH */}
+        {/* POSTER WRAPPER */}
         <div ref={posterRef} className="w-[360px] flex-shrink-0 bg-white shadow-2xl relative overflow-hidden box-border rounded-[24px] border border-gray-100">
           
-          {/* Header Sederhana - Maroon */}
+          {/* Header */}
           <div className="bg-gradient-to-r from-[#800000] to-red-900 px-6 py-6 text-white relative z-10">
             <div className="flex justify-between items-center">
-               <div className="flex items-center gap-3">
-                  <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm border border-white/20">
-                    <Droplet size={22} fill="currentColor" className="text-white" />
-                  </div>
-                  <div>
-                      <h3 className="font-bold text-xl leading-none tracking-tight">URGENT</h3>
-                      <p className="text-[10px] font-medium opacity-90 tracking-[0.2em] mt-1 text-red-100">BUTUH DONOR DARAH</p>
-                  </div>
-               </div>
-               <div className="text-right">
-                  <p className="text-[9px] font-medium opacity-80 uppercase tracking-wide">Dibuat Oleh</p>
-                  <p className="text-xs font-bold tracking-wide">PMR SMANEL</p>
-               </div>
+               <div className="flex items-center gap-3"><div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm border border-white/20"><Droplet size={22} fill="currentColor" className="text-white" /></div><div><h3 className="font-bold text-xl leading-none">URGENT</h3><p className="text-[10px] font-medium opacity-90 tracking-[0.2em] mt-1 text-red-100 uppercase">BUTUH DONOR</p></div></div>
+               <div className="text-right"><p className="text-[9px] font-medium opacity-80 uppercase tracking-wide">Dibuat Oleh</p><p className="text-xs font-bold tracking-wide">PMR SMANEL</p></div>
             </div>
           </div>
 
           {/* Konten Utama */}
           <div className="px-7 py-8 bg-white">
-            
-            {/* Golongan Darah - Clean & Maroon */}
-            <div className="flex flex-col items-center justify-center mb-10">
-               <div className="flex items-start justify-center gap-2 mb-4">
-                    {/* Menggunakan warna Maroon untuk huruf Golongan Darah */}
-                    <span className="text-[110px] font-bold text-[#800000] leading-[0.8] tracking-tighter">{patient.bloodType}</span>
-                    <span className="text-5xl font-bold text-[#800000] mt-2">{safeText(patient.rhesus)}</span>
+            <div className="flex flex-col items-center justify-center mb-10 pb-6 border-b border-dashed border-gray-200">
+               {/* Golongan Darah - Fixed Layout */}
+               <div className="flex items-end justify-center mb-4 text-[#800000]">
+                    <span className="text-[100px] font-black leading-none">{patient.bloodType}</span>
+                    <span className="text-5xl font-bold ml-3 mb-2">{safeText(patient.rhesus)}</span>
                </div>
-               <div className="bg-red-50 text-[#800000] px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest border border-red-100">
-                  Dibutuhkan {patient.amount} Kantong
-               </div>
+               <div className="bg-red-50 text-[#800000] px-8 py-2.5 rounded-full text-sm font-bold uppercase tracking-widest border border-red-100 shadow-sm">Butuh {patient.amount} Kantong</div>
             </div>
 
-            {/* List Detail */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 group">
-                <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-[#800000]"><User size={20} /></div>
-                <div className="flex-1 border-b border-gray-100 pb-3">
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Nama Pasien</p>
-                  <p className="font-bold text-lg text-gray-800 leading-tight">{patient.patient}</p>
-                  {patient.age && <p className="text-xs text-gray-500 font-medium mt-0.5">Usia: {patient.age} Tahun</p>}
+            {/* List Detail - Table Layout untuk Stabilitas html2canvas */}
+            <div className="w-full">
+                <div className="flex items-start mb-5">
+                    <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-[#800000] shrink-0 mr-4"><User size={20} strokeWidth={2}/></div>
+                    <div className="flex-1 border-b border-gray-100 pb-2"><p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Nama Pasien</p><p className="font-bold text-xl text-gray-800 leading-tight">{patient.patient}</p>{patient.age && <p className="text-xs text-gray-500 font-medium mt-1">Usia: {patient.age} Tahun</p>}</div>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-4 group">
-                <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-[#800000]"><MapPin size={20} /></div>
-                <div className="flex-1 border-b border-gray-100 pb-3">
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Lokasi Dirawat</p>
-                  <p className="font-bold text-lg text-gray-800 leading-tight">{patient.hospital}</p>
+                <div className="flex items-start mb-5">
+                    <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-[#800000] shrink-0 mr-4"><MapPin size={20} strokeWidth={2}/></div>
+                    <div className="flex-1 border-b border-gray-100 pb-2"><p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Lokasi Dirawat</p><p className="font-bold text-lg text-gray-800 leading-tight">{patient.hospital}</p></div>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-4 group">
-                <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-[#800000]"><Phone size={20} /></div>
-                <div className="flex-1">
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Hubungi Keluarga</p>
-                  <p className="font-bold text-xl text-[#800000] leading-tight tracking-wide font-mono">{patient.contact}</p>
+                <div className="flex items-start">
+                    <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-[#800000] shrink-0 mr-4"><Phone size={20} strokeWidth={2}/></div>
+                    <div className="flex-1"><p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">Hubungi Keluarga</p><p className="font-bold text-2xl text-[#800000] leading-tight font-mono">{patient.contact}</p></div>
                 </div>
-              </div>
             </div>
           </div>
 
-          {/* Footer - Link Website Saja */}
-          <div className="bg-slate-900 py-5 px-6 text-center">
-             <div className="flex flex-col gap-3 items-center text-slate-300">
-                <p className="text-[10px] italic opacity-80 font-medium font-serif">"Setetes darah Anda, nyawa bagi sesama."</p>
-                <div className="flex items-center justify-center gap-4 w-full border-t border-white/10 pt-3">
-                   <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full">
-                      <Instagram size={14} className="text-red-400"/>
-                      <span className="text-[10px] font-bold tracking-wide text-white">@pmr_smanel</span>
-                   </div>
-                   <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full">
-                      <Globe size={14} className="text-red-400"/>
-                      <span className="text-[10px] font-bold tracking-wide text-white">bloodlink.pmrsmanel.my.id</span>
-                   </div>
-                </div>
+          {/* Footer - Block Display untuk mencegah geser */}
+          <div className="bg-slate-900 py-6 px-6 text-center rounded-b-[24px]">
+             <p className="text-[10px] italic text-slate-300 mb-3 font-medium font-serif">"Setetes darah Anda, nyawa bagi sesama."</p>
+             <div className="border-t border-white/10 pt-4 flex justify-center items-center gap-4 text-white">
+                 <div className="flex items-center"><Instagram size={14} className="text-red-400 mr-2"/><span className="text-[10px] font-bold tracking-wide">@pmr_smanel</span></div>
+                 <div className="w-1 h-1 bg-slate-500 rounded-full"></div>
+                 <div className="flex items-center"><Globe size={14} className="text-red-400 mr-2"/><span className="text-[10px] font-bold tracking-wide">bloodlink.pmrsmanel.my.id</span></div>
              </div>
           </div>
         </div>
 
-        {/* Tombol Download */}
-        <button 
-          onClick={handleDownload}
-          disabled={downloading || !libLoaded}
-          className="mt-8 w-full py-4 bg-white text-[#800000] rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-red-50 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-        >
-          {downloading ? <Loader size={18} className="animate-spin" /> : <Download size={18} />}
-          {downloading ? 'Memproses...' : 'Simpan Gambar'}
-        </button>
-        <p className="text-white/50 text-[11px] mt-4 text-center font-medium">
-          *Gambar akan tersimpan otomatis
-        </p>
+        <button onClick={handleDownload} disabled={downloading || !libLoaded} className="mt-8 w-full py-4 bg-white text-[#800000] rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl hover:bg-red-50 transition-all flex items-center justify-center gap-3 disabled:opacity-70">{downloading ? <Loader size={18} className="animate-spin" /> : <Download size={18} />} {downloading ? 'Memproses...' : 'Simpan Gambar'}</button>
+        <p className="text-white/50 text-[11px] mt-4 text-center">*Gambar akan tersimpan otomatis</p>
       </div>
     </div>
   );
 };
 
 // ============================================================================
-// 4. FORM COMPONENTS (DEFINISI SEBELUM APP)
+// 4. FORM COMPONENTS
 // ============================================================================
+
+const Login = ({ onLogin, onBack }) => {
+  const [user, setUser] = useState('');
+  const [pass, setPass] = useState('');
+  const [err, setErr] = useState('');
+  const handleLogin = (e) => { e.preventDefault(); if(user === 'User' && pass === 'User') { onLogin(); } else { setErr('Username atau Password salah!'); } };
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <div className="text-center mb-8"><Shield size={48} className="text-[#2C3E50] mx-auto mb-2" /><h2 className="text-2xl font-bold text-[#2C3E50]">Admin Login</h2><p className="text-gray-500 text-sm">Akses khusus pengurus PMR</p></div>
+        {err && <div className="bg-red-100 text-red-600 p-3 rounded mb-4 text-sm text-center">{err}</div>}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div><label className="block text-sm font-semibold mb-1">Username</label><input type="text" className="w-full border rounded-lg p-3" value={user} onChange={(e) => setUser(e.target.value)}/></div>
+          <div><label className="block text-sm font-semibold mb-1">Password</label><input type="password" className="w-full border rounded-lg p-3" value={pass} onChange={(e) => setPass(e.target.value)}/></div>
+          <button type="submit" className="w-full bg-[#2C3E50] text-white py-3 rounded-lg font-bold hover:bg-blue-900 transition-colors">Masuk Dashboard</button>
+        </form>
+        <button onClick={onBack} className="w-full mt-4 text-sm text-gray-500 hover:text-gray-800">&larr; Kembali ke Beranda</button>
+      </div>
+    </div>
+  );
+};
 
 const RequestForm = ({ onSubmit, isLoading }) => {
     const [form, setForm] = useState({ patient: '', age: '', hospital: '', bloodType: 'A', rhesus: '+', amount: '', contact: '', contact2: '' });
@@ -298,25 +249,16 @@ const RequestForm = ({ onSubmit, isLoading }) => {
             <div><label className="block text-sm font-semibold text-gray-700 mb-1">Usia (Opsional)</label><input type="number" className="w-full border rounded-lg p-2" placeholder="Contoh: 45" value={form.age} onChange={e => setForm({...form, age: e.target.value})} /></div>
           </div>
           <div><label className="block text-sm font-semibold text-gray-700 mb-1">Dirawat di</label><input required type="text" className="w-full border rounded-lg p-2" placeholder="Nama Rumah Sakit / Puskesmas" value={form.hospital} onChange={e => setForm({...form, hospital: e.target.value})} /></div>
-          
           <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm font-semibold text-gray-700 mb-1">Gol Darah (Rhesus)</label>
-              <div className="flex gap-2">
-                <select className="w-full border rounded-lg p-2 bg-white" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select>
-                <select className="w-full border rounded-lg p-2 bg-white" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">+</option><option value="-">-</option></select>
-              </div>
-            </div>
-            <div><label className="block text-sm font-semibold text-gray-700 mb-1">Jumlah (Kantong)</label><input required type="number" className="w-full border rounded-lg p-2" placeholder="Contoh: 2" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} /></div>
+            <div><label className="block text-sm font-semibold text-gray-700 mb-1">Gol Darah</label><select className="w-full border rounded-lg p-2 bg-white" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+            <div><label className="block text-sm font-semibold text-gray-700 mb-1">Jumlah</label><input required type="number" className="w-full border rounded-lg p-2" placeholder="Contoh: 2" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} /></div>
           </div>
-          
+          <div className="grid grid-cols-2 gap-4"><div><label className="block text-sm font-semibold text-gray-700 mb-1">Rhesus</label><select className="w-full border rounded-lg p-2 bg-white" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">+</option><option value="-">-</option></select></div></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label className="block text-sm font-semibold text-gray-700 mb-1">HP (Utama)</label><input required type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.contact} onChange={e => setForm({...form, contact: e.target.value})} /></div>
-              <div><label className="block text-sm font-semibold text-gray-700 mb-1">HP Alternatif / Keluarga Lain (Opsional)</label><input type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.contact2} onChange={e => setForm({...form, contact2: e.target.value})} /></div>
+              <div><label className="block text-sm font-semibold text-gray-700 mb-1">HP Alternatif</label><input type="tel" className="w-full border rounded-lg p-2" placeholder="Opsional" value={form.contact2} onChange={e => setForm({...form, contact2: e.target.value})} /></div>
           </div>
-  
-          <button disabled={isLoading} type="submit" className="w-full bg-[#800000] text-white font-bold py-3 rounded-lg hover:bg-red-900 transition-colors disabled:bg-gray-400">
-            {isLoading ? 'Mengirim Data...' : 'Kirim Permohonan'}
-          </button>
+          <button disabled={isLoading} type="submit" className="w-full bg-[#800000] text-white font-bold py-3 rounded-lg hover:bg-red-900 transition-colors disabled:bg-gray-400">{isLoading ? 'Mengirim...' : 'Kirim Permohonan'}</button>
         </form>
       </div>
     );
@@ -333,23 +275,236 @@ const VolunteerForm = ({ onSubmit, isLoading }) => {
             <div><label className="block text-sm font-semibold text-gray-700 mb-1">Golongan Darah</label><select className="w-full border rounded-lg p-2 bg-white" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
             <div><label className="block text-sm font-semibold text-gray-700 mb-1">Rhesus</label><select className="w-full border rounded-lg p-2 bg-white" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">Positif (+)</option><option value="-">Negatif (-)</option></select></div>
           </div>
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Alamat Domisili</label><input required type="text" className="w-full border rounded-lg p-2" value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Waktu Donor Terakhir (Opsional)</label><input type="date" className="w-full border rounded-lg p-2" value={form.lastDonorDate} onChange={e => setForm({...form, lastDonorDate: e.target.value})} /><p className="text-xs text-gray-500 mt-1">Biarkan kosong jika belum pernah donor.</p></div>
-          
-          <div><label className="block text-sm font-semibold text-gray-700 mb-1">No. WhatsApp Aktif</label><input required type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
-          
-          <div className="bg-blue-50 p-4 rounded-xl flex items-start gap-3 border border-blue-100">
-             <Info size={18} className="text-blue-600 mt-0.5 shrink-0" />
-             <p className="text-sm text-blue-800 leading-snug">Dengan mendaftar, saya menyatakan <strong>bersedia dihubungi sewaktu-waktu</strong> jika ada pasien yang membutuhkan golongan darah saya.</p>
-          </div>
-  
-          <button disabled={isLoading} type="submit" className="w-full bg-[#800000] text-white font-bold py-3 rounded-lg hover:bg-red-900 transition-colors disabled:bg-gray-400">
-             {isLoading ? 'Menyimpan...' : 'Daftar Jadi Relawan'}
-          </button>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Alamat</label><input required type="text" className="w-full border rounded-lg p-2" value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-1">Waktu Donor Terakhir</label><input type="date" className="w-full border rounded-lg p-2" value={form.lastDonorDate} onChange={e => setForm({...form, lastDonorDate: e.target.value})} /><p className="text-xs text-gray-500 mt-1">Biarkan kosong jika belum pernah.</p></div>
+          <div><label className="block text-sm font-semibold text-gray-700 mb-1">WhatsApp</label><input required type="tel" className="w-full border rounded-lg p-2" placeholder="08..." value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
+          <div className="bg-blue-50 p-4 rounded-xl flex items-start gap-3 border border-blue-100"><Info size={18} className="text-blue-600 mt-0.5 shrink-0" /><p className="text-sm text-blue-800 leading-snug">Dengan mendaftar, saya menyatakan <strong>bersedia dihubungi sewaktu-waktu</strong> jika ada pasien yang membutuhkan golongan darah saya.</p></div>
+          <button disabled={isLoading} type="submit" className="w-full bg-[#800000] text-white font-bold py-3 rounded-lg hover:bg-red-900 transition-colors disabled:bg-gray-400">{isLoading ? 'Menyimpan...' : 'Daftar Jadi Relawan'}</button>
         </form>
       </div>
     );
 };
+
+// ============================================================================
+// 5. ADMIN PANEL
+// ============================================================================
+
+const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock, setPmiStock, mobileUnit, setMobileUnit, onLogout, showToast, showConfirm }) => {
+    const [activeTab, setActiveTab] = useState('requests');
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [editingVolunteer, setEditingVolunteer] = useState(null);
+    const [newReq, setNewReq] = useState({ patient: '', age: '', hospital: '', bloodType: 'A', rhesus: '+', amount: '', contact: '', contact2: '' });
+    const [newVol, setNewVol] = useState({ name: '', bloodType: 'A', rhesus: '+', phone: '', address: '', lastDonorDate: '' });
+    const [newSchedule, setNewSchedule] = useState({ location: '', date: '', time: '' });
+    const [savePmiLoading, setSavePmiLoading] = useState(false);
+    const [updatingId, setUpdatingId] = useState(null);
+  
+    const safeRequests = requests || [];
+    const safeVolunteers = volunteers || [];
+    const safePmiStock = pmiStock || [];
+    const safeMobileUnit = mobileUnit || [];
+
+    const handlePmiChange = (idx, field, val) => {
+      const newStock = [...safePmiStock];
+      if (newStock[idx]) {
+         newStock[idx][field] = parseInt(val) || 0;
+         newStock[idx].total = (parseInt(newStock[idx].A) || 0) + (parseInt(newStock[idx].B) || 0) + (parseInt(newStock[idx].O) || 0) + (parseInt(newStock[idx].AB) || 0);
+         setPmiStock(newStock);
+      }
+    };
+  
+    const handleSavePmiStock = async () => {
+      setSavePmiLoading(true);
+      const lastUpdateStr = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'short', hour:'2-digit', minute:'2-digit'});
+      for (const item of safePmiStock) {
+          const updateData = { ...item, lastUpdate: lastUpdateStr };
+          await sendDataToSheet('pmiStock', updateData, 'update');
+      }
+      setSavePmiLoading(false);
+      showToast("Stok PMI berhasil diperbarui!", 'success');
+    };
+  
+    const toggleStatus = async (id) => {
+      setUpdatingId(id);
+      const updated = safeRequests.map(req => req.id === id ? { ...req, status: req.status === 'Mencari' ? 'Terpenuhi' : 'Mencari' } : req);
+      setRequests(updated);
+      const item = updated.find(r => r.id === id);
+      if(item) await sendDataToSheet('requests', item, 'update');
+      setUpdatingId(null);
+    };
+  
+    const handleAddRequest = async (e) => {
+      e.preventDefault();
+      const item = { id: Date.now(), ...newReq, status: 'Mencari', timestamp: new Date().toLocaleDateString() };
+      setRequests([...safeRequests, item]);
+      setNewReq({ patient: '', age: '', hospital: '', bloodType: 'A', rhesus: '+', amount: '', contact: '', contact2: '' });
+      setShowAddForm(false);
+      await sendDataToSheet('requests', item);
+      showToast("Permohonan ditambahkan", 'success');
+    };
+  
+    const handleAddVolunteer = async (e) => {
+      e.preventDefault();
+      const item = { id: Date.now(), ...newVol, status: 'Aktif', timestamp: new Date().toLocaleDateString() };
+      setVolunteers([...safeVolunteers, item]);
+      setNewVol({ name: '', bloodType: 'A', rhesus: '+', phone: '', address: '', lastDonorDate: '' });
+      setShowAddForm(false);
+      await sendDataToSheet('volunteers', item);
+      showToast("Relawan ditambahkan", 'success');
+    };
+  
+    const handleEditVolunteer = async (e) => {
+      e.preventDefault();
+      const updated = volunteers.map(v => v.id === editingVolunteer.id ? editingVolunteer : v);
+      setVolunteers(updated);
+      await sendDataToSheet('volunteers', editingVolunteer, 'update');
+      showToast("Data relawan diperbarui!", 'success');
+      setEditingVolunteer(null);
+    };
+  
+    const handleAddSchedule = async (e) => {
+      e.preventDefault();
+      const item = { id: Date.now(), ...newSchedule };
+      setMobileUnit([...safeMobileUnit, item]);
+      setNewSchedule({ location: '', date: '', time: '' });
+      await sendDataToSheet('mobileUnit', item);
+      showToast("Jadwal baru tersimpan", 'success');
+    };
+  
+    const confirmDelete = (id, type) => {
+      showConfirm("Hapus Data?", "Data akan dihapus permanen.", async () => {
+          let sheetName = type === 'volunteer' ? 'volunteers' : 'mobileUnit';
+          if(type === 'volunteer') setVolunteers(safeVolunteers.filter(v => v.id !== id));
+          if(type === 'schedule') setMobileUnit(safeMobileUnit.filter(s => s.id !== id));
+          await sendDataToSheet(sheetName, { id }, 'delete');
+          showToast("Data berhasil dihapus", 'success');
+      });
+    };
+    
+    return (
+      <div className="min-h-screen bg-gray-100 flex relative text-gray-800">
+        {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setSidebarOpen(false)}></div>}
+        <aside className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-[#2C3E50] text-white transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+          <div className="p-6 border-b border-gray-700 flex justify-between"><div><h2 className="text-xl font-bold">Admin Panel</h2><p className="text-xs text-gray-400">PMR SMANEL</p></div><button onClick={() => setSidebarOpen(false)} className="md:hidden"><X/></button></div>
+          <nav className="p-4 space-y-2">
+            {['requests', 'volunteers', 'stock'].map(tab => (
+                <button key={tab} onClick={() => { setActiveTab(tab); setShowAddForm(false); setSidebarOpen(false); }} className={`w-full text-left p-3 rounded hover:bg-white/10 ${activeTab === tab ? 'bg-[#800000]' : ''}`}>{tab === 'requests' ? 'Permohonan' : tab === 'volunteers' ? 'Relawan' : 'Stok & Jadwal'}</button>
+            ))}
+            <button onClick={onLogout} className="w-full text-left p-3 rounded hover:bg-white/10 text-red-300 mt-10 flex items-center gap-2"><LogOut size={16}/> Logout</button>
+          </nav>
+        </aside>
+        
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto h-screen">
+          <div className="flex justify-between items-center mb-6">
+             <button onClick={() => setSidebarOpen(true)} className="md:hidden text-gray-800"><Menu/></button>
+             <h1 className="text-2xl font-bold text-gray-800">{activeTab === 'requests' ? 'Daftar Permohonan' : activeTab === 'volunteers' ? 'Data Relawan' : 'Stok & Jadwal'}</h1>
+          </div>
+
+          {activeTab === 'requests' && (
+            <div className="bg-white rounded-xl shadow overflow-hidden">
+              <div className="p-4 border-b flex justify-between bg-gray-50"><span className="font-bold text-gray-700">Tabel Permohonan</span><button onClick={() => setShowAddForm(!showAddForm)} className="bg-[#2C3E50] text-white px-3 py-1 rounded text-sm"><PlusCircle size={16} className="inline"/> Tambah</button></div>
+              {showAddForm && (
+                <form onSubmit={handleAddRequest} className="p-4 bg-red-50 grid grid-cols-2 gap-4 mb-4 border-b">
+                   <input required placeholder="Nama Pasien" className="p-2 border rounded" value={newReq.patient} onChange={e=>setNewReq({...newReq, patient: e.target.value})}/>
+                   <input required placeholder="Rumah Sakit" className="p-2 border rounded" value={newReq.hospital} onChange={e=>setNewReq({...newReq, hospital: e.target.value})}/>
+                   <div className="flex gap-2"><select className="p-2 border rounded w-1/2" value={newReq.bloodType} onChange={e=>setNewReq({...newReq, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select><input type="number" placeholder="Jml" className="p-2 border rounded w-1/2" value={newReq.amount} onChange={e=>setNewReq({...newReq, amount: e.target.value})}/></div>
+                   <input required placeholder="Kontak HP" className="p-2 border rounded" value={newReq.contact} onChange={e=>setNewReq({...newReq, contact: e.target.value})}/>
+                   <button type="submit" className="col-span-2 bg-[#800000] text-white py-2 rounded font-bold">Simpan Data</button>
+                </form>
+              )}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm"><thead className="bg-gray-100 text-gray-700"><tr><th className="p-3">Pasien</th><th className="p-3">Gol</th><th className="p-3">Status</th><th className="p-3">Aksi</th></tr></thead>
+                <tbody>{safeRequests.length > 0 ? safeRequests.map(req => (
+                    <tr key={req.id} className="border-b hover:bg-gray-50"><td className="p-3 font-medium text-gray-800">{req.patient}<div className="text-xs text-gray-500">{req.hospital}</div></td><td className="p-3 font-bold text-[#800000]">{req.bloodType}{req.rhesus}</td><td className="p-3"><span className={`px-2 py-1 rounded text-xs ${req.status==='Mencari'?'bg-red-100 text-red-600':'bg-green-100 text-green-600'}`}>{req.status}</span></td><td className="p-3"><button onClick={() => toggleStatus(req.id)} className="text-blue-600 hover:underline" disabled={updatingId === req.id}>{updatingId === req.id ? '...' : 'Ubah'}</button></td></tr>
+                )) : <tr><td colSpan="4" className="p-4 text-center text-gray-500">Belum ada data permohonan.</td></tr>}</tbody></table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'volunteers' && (
+             <div className="bg-white rounded-xl shadow overflow-hidden">
+                <div className="p-4 border-b flex justify-between bg-gray-50"><span className="font-bold text-gray-700">Tabel Relawan</span><button onClick={() => setShowAddForm(!showAddForm)} className="bg-[#2C3E50] text-white px-3 py-1 rounded text-sm"><PlusCircle size={16} className="inline"/> Tambah</button></div>
+                {showAddForm && (
+                    <form onSubmit={handleAddVolunteer} className="p-4 bg-blue-50 grid grid-cols-2 gap-4 mb-4 border-b">
+                        <input required placeholder="Nama Lengkap" className="p-2 border rounded" value={newVol.name} onChange={e=>setNewVol({...newVol, name: e.target.value})}/>
+                        <input required placeholder="No. HP / WA" className="p-2 border rounded" value={newVol.phone} onChange={e=>setNewVol({...newVol, phone: e.target.value})}/>
+                        <div className="flex gap-2"><select className="p-2 border rounded w-1/2" value={newVol.bloodType} onChange={e=>setNewVol({...newVol, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+                        <button type="submit" className="col-span-2 bg-[#2C3E50] text-white py-2 rounded font-bold">Simpan Data</button>
+                    </form>
+                )}
+                <div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-gray-100 text-gray-700"><tr><th className="p-3">Nama</th><th className="p-3">Gol</th><th className="p-3">HP</th><th className="p-3">Aksi</th></tr></thead><tbody>{safeVolunteers.length > 0 ? safeVolunteers.map(v => (<tr key={v.id} className="border-b hover:bg-gray-50"><td className="p-3 font-medium text-gray-800">{v.name}</td><td className="p-3 font-bold text-[#800000]">{v.bloodType}{v.rhesus}</td><td className="p-3 text-gray-600">{v.phone}</td><td className="p-3 flex gap-2"><button onClick={() => setEditingVolunteer(v)} className="text-blue-500"><Edit3 size={16}/></button><button onClick={() => confirmDelete(v.id, 'volunteer')} className="text-red-500"><Trash2 size={16}/></button></td></tr>)) : <tr><td colSpan="4" className="p-4 text-center text-gray-500">Belum ada data relawan.</td></tr>}</tbody></table></div>
+             </div>
+          )}
+
+          {activeTab === 'stock' && (
+              <div className="space-y-6">
+                  <div className="bg-white p-6 rounded-xl shadow">
+                      <h3 className="font-bold mb-4 text-gray-800">Update Stok Darah PMI</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="bg-gray-100"><tr><th className="p-2 text-left">Produk</th><th>A</th><th>B</th><th>O</th><th>AB</th></tr></thead>
+                            <tbody>{safePmiStock.map((row, i) => (
+                                <tr key={i} className="border-b">
+                                    <td className="py-2 font-medium text-gray-700">{row.product}</td>
+                                    <td className="text-center"><input type="number" className="w-12 border p-1 text-center rounded" value={row.A} onChange={e=>handlePmiChange(i, 'A', e.target.value)}/></td>
+                                    <td className="text-center"><input type="number" className="w-12 border p-1 text-center rounded" value={row.B} onChange={e=>handlePmiChange(i, 'B', e.target.value)}/></td>
+                                    <td className="text-center"><input type="number" className="w-12 border p-1 text-center rounded" value={row.O} onChange={e=>handlePmiChange(i, 'O', e.target.value)}/></td>
+                                    <td className="text-center"><input type="number" className="w-12 border p-1 text-center rounded" value={row.AB} onChange={e=>handlePmiChange(i, 'AB', e.target.value)}/></td>
+                                </tr>
+                            ))}</tbody>
+                        </table>
+                      </div>
+                      <button onClick={handleSavePmiStock} disabled={savePmiLoading} className="mt-4 bg-green-600 text-white px-4 py-2 rounded w-full font-bold hover:bg-green-700">{savePmiLoading ? 'Menyimpan...' : 'Simpan Perubahan Stok'}</button>
+                  </div>
+                  
+                  <div className="bg-white p-6 rounded-xl shadow">
+                      <h3 className="font-bold mb-4 text-gray-800">Jadwal Mobil Unit</h3>
+                      <form onSubmit={handleAddSchedule} className="flex flex-col md:flex-row gap-2 mb-4">
+                          <input placeholder="Lokasi" className="border p-2 rounded flex-1" value={newSchedule.location} onChange={e=>setNewSchedule({...newSchedule, location: e.target.value})}/>
+                          <input type="date" className="border p-2 rounded" value={newSchedule.date} onChange={e=>setNewSchedule({...newSchedule, date: e.target.value})}/>
+                          <input placeholder="Jam (Contoh: 08.00)" className="border p-2 rounded" value={newSchedule.time} onChange={e=>setNewSchedule({...newSchedule, time: e.target.value})}/>
+                          <button className="bg-blue-600 text-white px-4 py-2 rounded font-bold hover:bg-blue-700">Tambah</button>
+                      </form>
+                      <ul className="space-y-2">
+                        {safeMobileUnit.length > 0 ? safeMobileUnit.map(m => (
+                            <li key={m.id} className="flex justify-between items-center border-b pb-2 text-sm text-gray-700">
+                                <span><strong className="text-gray-900">{m.location}</strong> <br/><span className="text-xs text-gray-500">{m.date} • {m.time}</span></span>
+                                <button onClick={()=>confirmDelete(m.id, 'schedule')} className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 size={16}/></button>
+                            </li>
+                        )) : <li className="text-gray-500 text-sm italic text-center">Belum ada jadwal.</li>}
+                      </ul>
+                  </div>
+              </div>
+          )}
+        </main>
+        
+        {editingVolunteer && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4 backdrop-blur-sm">
+                <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl">
+                    <h3 className="font-bold text-xl mb-4 text-gray-800">Edit Data Relawan</h3>
+                    <div className="space-y-3">
+                        <div><label className="text-xs font-bold text-gray-500 uppercase">Nama</label><input className="w-full border p-2 rounded text-gray-800" value={editingVolunteer.name} onChange={e=>setEditingVolunteer({...editingVolunteer, name: e.target.value})}/></div>
+                        <div className="flex gap-2">
+                            <div className="w-1/2"><label className="text-xs font-bold text-gray-500 uppercase">Golongan</label><select className="w-full border p-2 rounded bg-white text-gray-800" value={editingVolunteer.bloodType} onChange={e=>setEditingVolunteer({...editingVolunteer, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+                            <div className="w-1/2"><label className="text-xs font-bold text-gray-500 uppercase">Rhesus</label><select className="w-full border p-2 rounded bg-white text-gray-800" value={editingVolunteer.rhesus} onChange={e=>setEditingVolunteer({...editingVolunteer, rhesus: e.target.value})}><option>+</option><option>-</option></select></div>
+                        </div>
+                        <div><label className="text-xs font-bold text-gray-500 uppercase">No. HP</label><input className="w-full border p-2 rounded text-gray-800" value={editingVolunteer.phone} onChange={e=>setEditingVolunteer({...editingVolunteer, phone: e.target.value})}/></div>
+                    </div>
+                    <div className="flex gap-2 mt-6">
+                        <button onClick={handleEditVolunteer} className="flex-1 bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700">Simpan Perubahan</button>
+                        <button onClick={()=>setEditingVolunteer(null)} className="flex-1 bg-gray-200 text-gray-700 py-2 rounded font-bold hover:bg-gray-300">Batal</button>
+                    </div>
+                </div>
+            </div>
+        )}
+      </div>
+    );
+};
+
+// ============================================================================
+// 6. MAIN COMPONENTS (Navbar, Hero, dll)
+// ============================================================================
 
 const Navbar = ({ setView, view, isLoggedIn }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -670,7 +825,7 @@ const VolunteerList = ({ volunteers, setView }) => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-10"><h2 className="text-3xl font-bold text-slate-800 mb-2">Relawan Siap Donor</h2><p className="text-slate-500">Pahlawan kemanusiaan yang siap berbagi kehidupan.</p></div>
         <div className="flex flex-col md:flex-row justify-center gap-4 mb-10">
-            <div className="flex gap-2 flex-wrap justify-center">{['ALL', 'A', 'B', 'AB', 'O'].map(type => (<button key={type} onClick={() => setFilterBloodType(type)} className={`px-5 py-2 rounded-full font-bold text-sm transition-all ${filterBloodType === type ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>{type === 'ALL' ? 'Semua' : type}</button>))}</div>
+            <div className="flex gap-2 flex-wrap justify-center">{['ALL', 'A', 'B', 'AB', 'O'].map(type => (<button key={type} onClick={() => setFilterBloodType(type)} className={`px-5 py-2 rounded-full font-bold text-sm transition-all ${filterBlood === type ? 'bg-slate-800 text-white shadow-lg' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>{type === 'ALL' ? 'Semua' : type}</button>))}</div>
             <button onClick={() => setShowOnlyReady(!showOnlyReady)} className={`px-5 py-2 rounded-full font-bold text-sm flex items-center gap-2 transition-all ${showOnlyReady ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' : 'bg-white border border-slate-200 text-slate-500 hover:border-emerald-500 hover:text-emerald-500'}`}>{showOnlyReady ? <CheckCircle size={16}/> : <Clock size={16}/>} Hanya Siap Donor</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -1039,7 +1194,7 @@ const App = () => {
     <div className="font-sans text-gray-900 bg-white">
       <Navbar setView={setView} view={view} isLoggedIn={isLoggedIn} />
       {loadingData && (
-        <div className="fixed top-20 left-0 w-full bg-yellow-100 text-yellow-800 text-center py-2 text-sm z-40 flex items-center justify-center gap-2 border-b border-yellow-200">
+        <div className="fixed top-20 left-0 w-full bg-yellow-100 text-yellow-800 text-center py-2 text-sm z-40 flex items-center justify-center gap-2">
            <Loader className="animate-spin" size={16}/> Sinkronisasi data server...
         </div>
       )}
@@ -1048,18 +1203,14 @@ const App = () => {
         <div className="animate-fadeIn">
           <Hero setView={setView} />
           <StockDashboard bloodStock={bloodStock} pmiStock={pmiStock} mobileUnit={mobileUnit} />
-          <div className="py-16 bg-gray-50 text-center border-t border-gray-200">
-             <h2 className="text-2xl font-bold text-gray-800 mb-8">Fitur Layanan</h2>
-             <div className="flex justify-center gap-6 flex-wrap px-4">
-                <button onClick={() => setView('patient_list')} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all w-72 border border-gray-200 text-center group">
-                   <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-600 group-hover:text-white transition-colors"><Activity size={24} /></div>
-                   <h3 className="font-bold text-lg text-gray-800 mb-2">Pasien Butuh Darah</h3>
-                   <p className="text-sm text-gray-600">Lihat daftar pasien yang membutuhkan donor segera.</p>
+          <div className="py-10 bg-gray-50 text-center">
+             <h2 className="text-2xl font-bold text-[#2C3E50] mb-6">Fitur Layanan</h2>
+             <div className="flex justify-center gap-4 flex-wrap px-4">
+                <button onClick={() => setView('patient_list')} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all w-64 border-t-4 border-[#C0392B]">
+                   <Activity className="mx-auto text-[#C0392B] mb-2" size={32}/><h3 className="font-bold text-lg">Pasien Butuh Darah</h3><p className="text-sm text-gray-500 mt-2">Lihat daftar pasien yang membutuhkan donor segera.</p>
                 </button>
-                <button onClick={() => setView('volunteer_list')} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all w-72 border border-gray-200 text-center group">
-                   <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors"><Users size={24} /></div>
-                   <h3 className="font-bold text-lg text-gray-800 mb-2">Data Relawan</h3>
-                   <p className="text-sm text-gray-600">Lihat daftar pahlawan donor darah SMANEL.</p>
+                <button onClick={() => setView('volunteer_list')} className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all w-64 border-t-4 border-[#2C3E50]">
+                   <Users className="mx-auto text-[#2C3E50] mb-2" size={32}/><h3 className="font-bold text-lg">Data Relawan</h3><p className="text-sm text-gray-500 mt-2">Lihat daftar pahlawan donor darah SMANEL.</p>
                 </button>
              </div>
           </div>
@@ -1069,8 +1220,8 @@ const App = () => {
 
       {view === 'patient_list' && <div className="animate-fadeIn"><PatientList requests={requests} setView={setView} showToast={showToast} sharedId={sharedId} setSharedId={setSharedId} /></div>}
       {view === 'volunteer_list' && <div className="animate-fadeIn"><VolunteerList volunteers={volunteers} setView={setView} /></div>}
-      {view === 'search' && <div className="animate-fadeIn min-h-screen bg-gray-50 py-10"><div className="container mx-auto px-4 text-center"><h1 className="text-3xl font-bold text-gray-800 mb-2">Butuh Donor Darah?</h1><p className="text-gray-600 mb-8">Isi formulir di bawah ini agar kami dapat mencarikan relawan untuk Anda.</p><RequestForm onSubmit={handleRequestSubmit} isLoading={submitLoading} /></div></div>}
-      {view === 'register' && <div className="animate-fadeIn min-h-screen bg-gray-50 py-10"><div className="container mx-auto px-4 text-center"><h1 className="text-3xl font-bold text-gray-800 mb-2">Mari Berbagi Kehidupan</h1><p className="text-gray-600 mb-8">Bergabunglah menjadi relawan donor darah PMR SMANEL.</p><VolunteerForm onSubmit={handleVolunteerSubmit} isLoading={submitLoading} /></div></div>}
+      {view === 'search' && <div className="animate-fadeIn min-h-screen bg-red-50 py-10"><div className="container mx-auto px-4 text-center"><h1 className="text-3xl font-bold text-[#C0392B] mb-2">Butuh Donor Darah?</h1><p className="text-gray-600">Isi formulir di bawah ini agar kami dapat mencarikan relawan untuk Anda.</p><RequestForm onSubmit={handleRequestSubmit} isLoading={submitLoading} /></div></div>}
+      {view === 'register' && <div className="animate-fadeIn min-h-screen bg-blue-50 py-10"><div className="container mx-auto px-4 text-center"><h1 className="text-3xl font-bold text-[#2C3E50] mb-2">Mari Berbagi Kehidupan</h1><p className="text-gray-600">Bergabunglah menjadi relawan donor darah PMR SMANEL.</p><VolunteerForm onSubmit={handleVolunteerSubmit} isLoading={submitLoading} /></div></div>}
       {view === 'stock' && <div className="animate-fadeIn pt-10"><StockDashboard bloodStock={bloodStock} pmiStock={pmiStock} mobileUnit={mobileUnit} /></div>}
       {view === 'education' && <div className="animate-fadeIn pt-10"><Education articles={ARTICLES} /></div>}
       
