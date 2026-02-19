@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 // --- KONFIGURASI DATABASE ---
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzG0FX5KMVxI478mBBM1USPweM1BdZ8ZesWVPhS-YxHn2q8mHM70MXZN07ZsfPYeLfrjQ/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
 
 // ============================================================================
 // 1. DATA INITIAL & ARTIKEL
@@ -90,7 +90,6 @@ const sendDataToSheet = async (sheetName, data, action = 'write') => {
   if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("PASTE_URL")) return false;
   
   const sanitizedData = { ...data };
-  // Prefix ' agar tidak error di Spreadsheet
   if (sanitizedData.rhesus && !String(sanitizedData.rhesus).startsWith("'")) sanitizedData.rhesus = `'${sanitizedData.rhesus}`;
   if (sanitizedData.contact && !String(sanitizedData.contact).startsWith("'")) sanitizedData.contact = `'${sanitizedData.contact}`;
   if (sanitizedData.contact2 && !String(sanitizedData.contact2).startsWith("'")) sanitizedData.contact2 = `'${sanitizedData.contact2}`;
@@ -631,7 +630,7 @@ const AboutStats = ({ volunteers, requests }) => {
 // 5. ADMIN COMPONENTS
 // ============================================================================
 
-const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock, setPmiStock, mobileUnit, setMobileUnit, users, setUsers, onLogout, showToast }) => {
+const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock, setPmiStock, mobileUnit, setMobileUnit, users, setUsers, userRole, onLogout, showToast }) => {
     const [activeTab, setActiveTab] = useState('requests');
     const [saveLoading, setSaveLoading] = useState(false);
     const [newSched, setNewSched] = useState({ location: '', date: '', time: '' });
@@ -753,7 +752,9 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                     <button onClick={() => setActiveTab('requests')} className={`w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${activeTab === 'requests' ? 'bg-[#800000]' : 'hover:bg-white/5 text-slate-400'}`}><AlertCircle size={18}/> Permohonan</button>
                     <button onClick={() => setActiveTab('volunteers')} className={`w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${activeTab === 'volunteers' ? 'bg-[#800000]' : 'hover:bg-white/5 text-slate-400'}`}><Users size={18}/> Relawan</button>
                     <button onClick={() => setActiveTab('stock')} className={`w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${activeTab === 'stock' ? 'bg-[#800000]' : 'hover:bg-white/5 text-slate-400'}`}><Activity size={18}/> Update Stok & Jadwal</button>
-                    <button onClick={() => setActiveTab('users')} className={`w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${activeTab === 'users' ? 'bg-[#800000]' : 'hover:bg-white/5 text-slate-400'}`}><UserCog size={18}/> Manajemen User</button>
+                    {userRole === 'Super Admin' && (
+                        <button onClick={() => setActiveTab('users')} className={`w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${activeTab === 'users' ? 'bg-[#800000]' : 'hover:bg-white/5 text-slate-400'}`}><UserCog size={18}/> Manajemen User</button>
+                    )}
                     <button onClick={onLogout} className="w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 text-red-400 mt-20 hover:bg-red-400/10 text-left"><LogOut size={18}/> Logout</button>
                 </nav>
             </aside>
@@ -826,7 +827,7 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                     </div>
                 )}
                 
-                {activeTab === 'users' && (
+                {activeTab === 'users' && userRole === 'Super Admin' && (
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden text-left">
                         <div className="p-6 border-b bg-slate-50 flex justify-between items-center text-left">
                             <h3 className="font-bold text-slate-800 text-left">Daftar User Admin</h3>
@@ -1009,11 +1010,29 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
 // 6. MAIN APP COMPONENTS (LOGIN, FOOTER, FORMS)
 // ============================================================================
 
-const Login = ({ onLogin, onBack }) => {
+const Login = ({ users, onLogin, onBack }) => {
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
   const [err, setErr] = useState('');
-  const handleLogin = (e) => { e.preventDefault(); if(user === 'User' && pass === 'User') { onLogin(); } else { setErr('Username atau Password salah!'); } };
+  
+  const handleLogin = (e) => { 
+    e.preventDefault(); 
+    
+    // Cek kecocokan data login dengan data users dari Spreadsheet
+    const validUser = users && users.find(u => String(u.username) === String(user) && String(u.password) === String(pass));
+    
+    // Fallback rahasia jika database kosong / koneksi terputus
+    const isFallback = (user === 'User' && pass === 'User');
+
+    if(validUser) { 
+      onLogin(validUser.role); 
+    } else if (isFallback) {
+      onLogin('Super Admin'); // Fallback selalu dianggap Super Admin
+    } else { 
+      setErr('Username atau Password salah!'); 
+    } 
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 text-left">
       <div className="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md border border-slate-100 text-left">
@@ -1059,15 +1078,15 @@ const RequestForm = ({ onSubmit, isLoading }) => {
   return (
     <div className="bg-white p-8 rounded-[2.5rem] shadow-xl max-w-2xl mx-auto border-t-4 border-[#800000] text-left">
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-4 text-left">
-        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Nama Pasien</label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Nama Lengkap Pasien" value={form.patient} onChange={e => setForm({...form, patient: e.target.value})} /></div>
-        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Rumah Sakit</label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Contoh: RSUD Selong / Puskesmas Aikmel" value={form.hospital} onChange={e => setForm({...form, hospital: e.target.value})} /></div>
+        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Nama Pasien <span className="text-red-500">*</span></label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Nama Lengkap Pasien" value={form.patient} onChange={e => setForm({...form, patient: e.target.value})} /></div>
+        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Rumah Sakit <span className="text-red-500">*</span></label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Contoh: RSUD Selong / Puskesmas Aikmel" value={form.hospital} onChange={e => setForm({...form, hospital: e.target.value})} /></div>
         <div className="grid grid-cols-2 gap-4 text-left">
-          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Gol Darah</label><select className="w-full border-2 rounded-2xl p-4 bg-white outline-none font-bold text-left" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
-          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Rhesus</label><select className="w-full border-2 rounded-2xl p-4 bg-white outline-none font-bold text-left" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">+</option><option value="-">-</option></select></div>
+          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Gol Darah <span className="text-red-500">*</span></label><select className="w-full border-2 rounded-2xl p-4 bg-white outline-none font-bold text-left" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Rhesus <span className="text-red-500">*</span></label><select className="w-full border-2 rounded-2xl p-4 bg-white outline-none font-bold text-left" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">+</option><option value="-">-</option></select></div>
         </div>
         <div className="grid grid-cols-2 gap-4 text-left">
-          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Jumlah (Kantong)</label><input required type="number" className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Contoh: 2" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} /></div>
-          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">WhatsApp Keluarga</label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="08..." value={form.contact} onChange={e => setForm({...form, contact: e.target.value})} /></div>
+          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Jumlah (Kantong) <span className="text-red-500">*</span></label><input required type="number" className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Contoh: 2" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})} /></div>
+          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">WhatsApp Keluarga <span className="text-red-500">*</span></label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="08..." value={form.contact} onChange={e => setForm({...form, contact: e.target.value})} /></div>
         </div>
         <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">No Kontak ke 2 (Opsional)</label><input className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="08..." value={form.contact2} onChange={e => setForm({...form, contact2: e.target.value})} /></div>
         <button disabled={isLoading} type="submit" className="w-full bg-[#800000] text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg mt-4 disabled:bg-slate-300 transition-all text-left flex items-center justify-center">{isLoading ? 'Memproses...' : 'Kirim Permohonan'}</button>
@@ -1081,14 +1100,14 @@ const VolunteerForm = ({ onSubmit, isLoading }) => {
   return (
     <div className="bg-white p-8 rounded-[2.5rem] shadow-xl max-w-2xl mx-auto border-t-4 border-[#800000] text-left">
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-4 text-left text-left">
-        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Nama Lengkap</label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Nama Anda" value={form.name} onChange={e => setForm({...form, name: e.target.value})} /></div>
-        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Alamat Domisili</label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Alamat Lengkap" value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
+        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Nama Lengkap <span className="text-red-500">*</span></label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Nama Anda" value={form.name} onChange={e => setForm({...form, name: e.target.value})} /></div>
+        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Alamat Domisili <span className="text-red-500">*</span></label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="Alamat Lengkap" value={form.address} onChange={e => setForm({...form, address: e.target.value})} /></div>
         <div className="grid grid-cols-2 gap-4 text-left">
-          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Gol Darah</label><select className="w-full border-2 rounded-2xl p-4 bg-white outline-none font-bold text-left" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
-          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Rhesus</label><select className="w-full border-2 rounded-2xl p-4 bg-white outline-none font-bold text-left" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">Positif (+)</option><option value="-">Negatif (-)</option></select></div>
+          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Gol Darah <span className="text-red-500">*</span></label><select className="w-full border-2 rounded-2xl p-4 bg-white outline-none font-bold text-left" value={form.bloodType} onChange={e => setForm({...form, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+          <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Rhesus <span className="text-red-500">*</span></label><select className="w-full border-2 rounded-2xl p-4 bg-white outline-none font-bold text-left" value={form.rhesus} onChange={e => setForm({...form, rhesus: e.target.value})}><option value="+">Positif (+)</option><option value="-">Negatif (-)</option></select></div>
         </div>
         <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">Tanggal Donor Terakhir (Opsional)</label><input type="date" className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" value={form.lastDonorDate} onChange={e => setForm({...form, lastDonorDate: e.target.value})} /></div>
-        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">WhatsApp Aktif</label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="08..." value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
+        <div className="text-left"><label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-2 text-left">WhatsApp Aktif <span className="text-red-500">*</span></label><input required className="w-full border-2 rounded-2xl p-4 outline-none focus:border-[#800000] font-bold text-left" placeholder="08..." value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} /></div>
         <button disabled={isLoading} type="submit" className="w-full bg-[#800000] text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg mt-4 disabled:bg-slate-300 transition-all text-left flex items-center justify-center">{isLoading ? 'Memproses...' : 'Daftar Relawan'}</button>
       </form>
     </div>
@@ -1136,6 +1155,7 @@ const Education = ({ articles }) => {
 const App = () => {
   const [view, setView] = useState('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('');
   const [loadingData, setLoadingData] = useState(false);
   const [toast, setToast] = useState(null);
 
@@ -1215,8 +1235,14 @@ const App = () => {
     setLoadingData(false);
   };
 
-  if(view === 'login') return <Login onLogin={() => { setIsLoggedIn(true); setView('admin'); }} onBack={() => setView('home')} />;
-  if(view === 'admin' && isLoggedIn) return <AdminPanel volunteers={volunteers} setVolunteers={setVolunteers} requests={requests} setRequests={setRequests} pmiStock={pmiStock} setPmiStock={setPmiStock} mobileUnit={mobileUnit} setMobileUnit={setMobileUnit} users={users} setUsers={setUsers} onLogout={() => { setIsLoggedIn(false); setView('home'); }} showToast={showToast} />;
+  const handleLoginSuccess = (role) => {
+    setIsLoggedIn(true);
+    setUserRole(role);
+    setView('admin');
+  };
+
+  if(view === 'login') return <Login users={users} onLogin={handleLoginSuccess} onBack={() => setView('home')} />;
+  if(view === 'admin' && isLoggedIn) return <AdminPanel volunteers={volunteers} setVolunteers={setVolunteers} requests={requests} setRequests={setRequests} pmiStock={pmiStock} setPmiStock={setPmiStock} mobileUnit={mobileUnit} setMobileUnit={setMobileUnit} users={users} setUsers={setUsers} userRole={userRole} onLogout={() => { setIsLoggedIn(false); setUserRole(''); setView('home'); }} showToast={showToast} />;
 
   return (
     <div className="font-sans antialiased text-slate-900 bg-white text-left">
