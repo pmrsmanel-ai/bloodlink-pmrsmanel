@@ -4,26 +4,38 @@ import {
   Shield, Activity, Calendar, CheckCircle, AlertCircle, LogOut, Edit3, 
   Trash2, Save, Users, ChevronRight, PlusCircle, User, Info, Loader, 
   RefreshCw, Facebook, Instagram, Youtube, Video, MessageCircle, Clock, 
-  Share2, AlertTriangle, ArrowLeft, Camera, Download, Globe, Copy, Target, Rocket
+  Share2, AlertTriangle, ArrowLeft, Camera, Download, Globe, Copy, Target, Rocket, UserCog
 } from 'lucide-react';
 
 // --- KONFIGURASI DATABASE ---
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzG0FX5KMVxI478mBBM1USPweM1BdZ8ZesWVPhS-YxHn2q8mHM70MXZN07ZsfPYeLfrjQ/exec";
 
 // ============================================================================
 // 1. DATA INITIAL & ARTIKEL
 // ============================================================================
 const FALLBACK_DATA = {
   bloodStock: {
-    A: { positive: 0, negative: 0 },
-    B: { positive: 0, negative: 0 },
-    AB: { positive: 0, negative: 0 },
-    O: { positive: 0, negative: 0 },
+    A: { positive: 5, negative: 1 },
+    B: { positive: 3, negative: 0 },
+    AB: { positive: 2, negative: 1 },
+    O: { positive: 8, negative: 2 },
   },
-  pmiStock: [],
-  mobileUnit: [],
-  volunteers: [],
-  requests: []
+  pmiStock: [
+    { product: 'WB', A: 10, B: 5, O: 12, AB: 3 },
+    { product: 'PRC', A: 15, B: 8, O: 20, AB: 5 },
+    { product: 'TC', A: 5, B: 2, O: 8, AB: 1 }
+  ],
+  mobileUnit: [
+    { id: 1, location: 'Kantor Bupati (Contoh)', date: new Date().toISOString().split('T')[0], time: '08:00 - Selesai' }
+  ],
+  volunteers: [
+    { id: 1, name: 'Relawan Contoh 1', bloodType: 'A', rhesus: '+', phone: '6281234567890', status: 'Aktif', lastDonorDate: '2023-01-01', address: 'Aikmel' },
+    { id: 2, name: 'Relawan Contoh 2', bloodType: 'O', rhesus: '-', phone: '6281987654321', status: 'Aktif', lastDonorDate: '2023-06-01', address: 'Selong' }
+  ],
+  requests: [
+    { id: 1, patient: 'Pasien Contoh', hospital: 'RSUD Selong', bloodType: 'B', rhesus: '+', amount: 2, contact: '6281999999999', status: 'Mencari' }
+  ],
+  users: []
 };
 
 const ARTICLES = [
@@ -327,18 +339,23 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
                               <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center">B</th>
                               <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center">O</th>
                               <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center">AB</th>
+                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">Total</th>
                           </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200 bg-white text-left">
-                          {pmiStock.length > 0 ? pmiStock.map((row, i) => (
+                          {pmiStock.length > 0 ? pmiStock.map((row, i) => {
+                              const total = (parseInt(row.A) || 0) + (parseInt(row.B) || 0) + (parseInt(row.O) || 0) + (parseInt(row.AB) || 0);
+                              return (
                                   <tr key={i} className="hover:bg-red-50/50 transition-colors">
                                       <td className="px-5 py-3.5 font-bold text-slate-700">{row.product}</td>
                                       <td className="px-4 py-3 text-center text-slate-600 border-l border-slate-100">{row.A}</td>
                                       <td className="px-4 py-3 text-center text-slate-600 border-l border-slate-100">{row.B}</td>
                                       <td className="px-4 py-3 text-center text-slate-600 border-l border-slate-100">{row.O}</td>
                                       <td className="px-4 py-3 text-center text-slate-600 border-l border-slate-100">{row.AB}</td>
+                                      <td className="px-4 py-3 text-center font-black text-[#800000] border-l border-slate-100 bg-red-50/30">{total}</td>
                                   </tr>
-                          )) : <tr><td colSpan="5" className="p-6 text-center text-slate-400 text-xs italic">Menunggu sinkronisasi...</td></tr>}
+                              );
+                          }) : <tr><td colSpan="6" className="p-6 text-center text-slate-400 text-xs italic">Menunggu sinkronisasi...</td></tr>}
                       </tbody>
                   </table>
                 </div>
@@ -614,11 +631,20 @@ const AboutStats = ({ volunteers, requests }) => {
 // 5. ADMIN COMPONENTS
 // ============================================================================
 
-const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock, setPmiStock, mobileUnit, setMobileUnit, onLogout, showToast }) => {
+const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock, setPmiStock, mobileUnit, setMobileUnit, users, setUsers, onLogout, showToast }) => {
     const [activeTab, setActiveTab] = useState('requests');
     const [saveLoading, setSaveLoading] = useState(false);
     const [newSched, setNewSched] = useState({ location: '', date: '', time: '' });
     const [editingVolunteer, setEditingVolunteer] = useState(null);
+
+    // States for adding data
+    const [isAddingRequest, setIsAddingRequest] = useState(false);
+    const [isAddingVolunteer, setIsAddingVolunteer] = useState(false);
+    const [isAddingUser, setIsAddingUser] = useState(false);
+    
+    const [newRequestData, setNewRequestData] = useState({ patient: '', hospital: '', bloodType: 'A', rhesus: '+', amount: '', contact: '', contact2: '' });
+    const [newVolunteerData, setNewVolunteerData] = useState({ name: '', address: '', bloodType: 'A', rhesus: '+', phone: '', lastDonorDate: '' });
+    const [newUserData, setNewUserData] = useState({ username: '', password: '', role: 'Admin' });
 
     const handlePmiChange = (idx, field, val) => {
         const newStock = [...pmiStock];
@@ -668,6 +694,50 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
         setEditingVolunteer(null);
     };
 
+    // --- NEW HANDLERS FOR ADDING DATA ---
+    const handleSaveNewRequest = async (e) => {
+        e.preventDefault();
+        const sanitized = { 
+            ...newRequestData, 
+            contact: cleanPhoneNumber(newRequestData.contact),
+            contact2: cleanPhoneNumber(newRequestData.contact2)
+        };
+        const item = { id: Date.now(), ...sanitized, status: 'Mencari' };
+        setRequests([...requests, item]);
+        await sendDataToSheet('requests', item);
+        showToast("Permohonan berhasil ditambahkan", "success");
+        setIsAddingRequest(false);
+        setNewRequestData({ patient: '', hospital: '', bloodType: 'A', rhesus: '+', amount: '', contact: '', contact2: '' });
+    };
+
+    const handleSaveNewVolunteer = async (e) => {
+        e.preventDefault();
+        const sanitized = { ...newVolunteerData, phone: cleanPhoneNumber(newVolunteerData.phone) };
+        const item = { id: Date.now(), ...sanitized, status: 'Aktif' };
+        setVolunteers([...volunteers, item]);
+        await sendDataToSheet('volunteers', item);
+        showToast("Relawan berhasil ditambahkan", "success");
+        setIsAddingVolunteer(false);
+        setNewVolunteerData({ name: '', address: '', bloodType: 'A', rhesus: '+', phone: '', lastDonorDate: '' });
+    };
+    
+    const handleSaveNewUser = async (e) => {
+        e.preventDefault();
+        const item = { id: Date.now(), ...newUserData };
+        setUsers([...users, item]);
+        await sendDataToSheet('users', item);
+        showToast("User berhasil ditambahkan", "success");
+        setIsAddingUser(false);
+        setNewUserData({ username: '', password: '', role: 'Admin' });
+    };
+    
+    const handleDeleteUser = async (id) => {
+        if(!window.confirm('Hapus user ini?')) return;
+        setUsers(users.filter(u => u.id !== id));
+        await sendDataToSheet('users', { id }, 'delete');
+        showToast("User dihapus", "success");
+    };
+
     // Sort requests: 'Mencari' first
     const sortedAdminRequests = [...requests].sort((a, b) => {
       if (a.status === 'Mencari' && b.status !== 'Mencari') return -1;
@@ -683,17 +753,24 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                     <button onClick={() => setActiveTab('requests')} className={`w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${activeTab === 'requests' ? 'bg-[#800000]' : 'hover:bg-white/5 text-slate-400'}`}><AlertCircle size={18}/> Permohonan</button>
                     <button onClick={() => setActiveTab('volunteers')} className={`w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${activeTab === 'volunteers' ? 'bg-[#800000]' : 'hover:bg-white/5 text-slate-400'}`}><Users size={18}/> Relawan</button>
                     <button onClick={() => setActiveTab('stock')} className={`w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${activeTab === 'stock' ? 'bg-[#800000]' : 'hover:bg-white/5 text-slate-400'}`}><Activity size={18}/> Update Stok & Jadwal</button>
+                    <button onClick={() => setActiveTab('users')} className={`w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-all ${activeTab === 'users' ? 'bg-[#800000]' : 'hover:bg-white/5 text-slate-400'}`}><UserCog size={18}/> Manajemen User</button>
                     <button onClick={onLogout} className="w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 text-red-400 mt-20 hover:bg-red-400/10 text-left"><LogOut size={18}/> Logout</button>
                 </nav>
             </aside>
             <main className="flex-1 p-8 overflow-y-auto h-screen text-left">
                 <header className="flex justify-between items-center mb-10 text-left">
-                    <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight text-left">{activeTab === 'requests' ? 'Manajemen Permohonan' : activeTab === 'volunteers' ? 'Relawan Siap Donor' : 'Stok & Jadwal PMI'}</h1>
+                    <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight text-left">{activeTab === 'requests' ? 'Manajemen Permohonan' : activeTab === 'volunteers' ? 'Relawan Siap Donor' : activeTab === 'users' ? 'Manajemen User' : 'Stok & Jadwal PMI'}</h1>
                 </header>
 
                 {activeTab === 'requests' && (
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden text-left">
-                        <div className="p-6 border-b bg-slate-50 flex justify-between items-center text-left"><h3 className="font-bold text-slate-800 text-left">Daftar Permohonan Darah</h3><span className="text-[10px] bg-red-100 text-red-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Total: {requests.length}</span></div>
+                        <div className="p-6 border-b bg-slate-50 flex justify-between items-center text-left">
+                            <h3 className="font-bold text-slate-800 text-left">Daftar Permohonan Darah</h3>
+                            <div className="flex items-center gap-3">
+                                <span className="text-[10px] bg-red-100 text-red-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Total: {requests.length}</span>
+                                <button onClick={() => setIsAddingRequest(true)} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase flex items-center gap-1 hover:bg-emerald-700 transition-all"><PlusCircle size={14}/> Tambah</button>
+                            </div>
+                        </div>
                         <div className="overflow-x-auto text-left">
                             <table className="w-full text-left">
                                 <thead className="bg-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-left">
@@ -720,7 +797,13 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
 
                 {activeTab === 'volunteers' && (
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden text-left">
-                        <div className="p-6 border-b bg-slate-50 flex justify-between items-center text-left"><h3 className="font-bold text-slate-800 text-left">Relawan Siap Donor</h3><span className="text-[10px] bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Total: {volunteers.length}</span></div>
+                        <div className="p-6 border-b bg-slate-50 flex justify-between items-center text-left">
+                            <h3 className="font-bold text-slate-800 text-left">Relawan Siap Donor</h3>
+                            <div className="flex items-center gap-3">
+                                <span className="text-[10px] bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest">Total: {volunteers.length}</span>
+                                <button onClick={() => setIsAddingVolunteer(true)} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase flex items-center gap-1 hover:bg-emerald-700 transition-all"><PlusCircle size={14}/> Tambah</button>
+                            </div>
+                        </div>
                         <div className="overflow-x-auto text-left">
                             <table className="w-full text-left">
                                 <thead className="bg-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-left">
@@ -742,13 +825,42 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                         </div>
                     </div>
                 )}
+                
+                {activeTab === 'users' && (
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden text-left">
+                        <div className="p-6 border-b bg-slate-50 flex justify-between items-center text-left">
+                            <h3 className="font-bold text-slate-800 text-left">Daftar User Admin</h3>
+                            <button onClick={() => setIsAddingUser(true)} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase flex items-center gap-1 hover:bg-emerald-700 transition-all"><PlusCircle size={14}/> Tambah User</button>
+                        </div>
+                        <div className="overflow-x-auto text-left">
+                            <table className="w-full text-left">
+                                <thead className="bg-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-left">
+                                    <tr><th className="p-4 text-left">Username</th><th className="p-4 text-left">Role</th><th className="p-4 text-right">Aksi</th></tr>
+                                </thead>
+                                <tbody className="divide-y text-left">
+                                    {users.length > 0 ? users.map(u => (
+                                        <tr key={u.id} className="hover:bg-slate-50 transition-colors text-left">
+                                            <td className="p-4 font-bold text-slate-800 text-left">{u.username}</td>
+                                            <td className="p-4 text-sm text-slate-600 text-left">{u.role}</td>
+                                            <td className="p-4 text-right">
+                                                <button onClick={() => handleDeleteUser(u.id)} className="text-red-300 hover:text-red-600 p-2"><Trash2 size={16}/></button>
+                                            </td>
+                                        </tr>
+                                    )) : <tr><td colSpan="3" className="p-6 text-center text-slate-400 text-sm italic">Belum ada user tambahan. Gunakan akun default.</td></tr>}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
 
                 {activeTab === 'stock' && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
                         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 text-left">
                             <h3 className="font-bold text-slate-800 mb-6 flex items-center gap-2 text-left"><Activity size={18} className="text-[#800000]"/> Update Stok Darah PMI</h3>
                             <div className="space-y-4 text-left">
-                                {pmiStock.map((row, i) => (
+                                {pmiStock.map((row, i) => {
+                                    const total = (parseInt(row.A) || 0) + (parseInt(row.B) || 0) + (parseInt(row.O) || 0) + (parseInt(row.AB) || 0);
+                                    return (
                                     <div key={i} className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 text-left">
                                         <div className="flex-1 font-bold text-slate-600 text-sm text-left">{row.product}</div>
                                         <div className="flex gap-2 text-left">
@@ -758,9 +870,13 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                                                     <input type="number" className="w-12 p-2 text-center rounded-lg border font-bold text-xs" value={row[type]} onChange={(e) => handlePmiChange(i, type, e.target.value)} />
                                                 </div>
                                             ))}
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-[9px] font-bold text-[#800000] mb-1">Total</span>
+                                                <div className="w-12 p-2 text-center rounded-lg border border-red-100 bg-red-50 font-bold text-xs text-[#800000]">{total}</div>
+                                            </div>
                                         </div>
                                     </div>
-                                ))}
+                                )})}
                             </div>
                             <button onClick={handleSaveStock} disabled={saveLoading} className="mt-8 w-full bg-emerald-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-emerald-700 flex items-center justify-center gap-2 disabled:bg-slate-300 uppercase tracking-widest text-xs transition-all shadow-md">
                                 {saveLoading ? <Loader size={18} className="animate-spin" /> : <Save size={18}/>} Simpan Stok PMI
@@ -794,6 +910,7 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                 )}
             </main>
 
+            {/* MODAL EDIT RELAWAN */}
             {editingVolunteer && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl animate-fadeIn">
@@ -809,6 +926,76 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                             <div className="flex gap-3 pt-4">
                                 <button type="button" onClick={() => setEditingVolunteer(null)} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold uppercase text-xs">Batal</button>
                                 <button type="submit" className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold uppercase text-xs">Simpan Perubahan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL TAMBAH PERMOHONAN */}
+            {isAddingRequest && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl animate-fadeIn overflow-y-auto max-h-[90vh]">
+                        <h3 className="text-2xl font-bold text-slate-800 mb-6">Tambah Permohonan Darah</h3>
+                        <form onSubmit={handleSaveNewRequest} className="space-y-4">
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama Pasien</label><input required className="w-full border-2 p-3 rounded-xl font-bold" value={newRequestData.patient} onChange={e => setNewRequestData({...newRequestData, patient: e.target.value})} placeholder="Nama Lengkap"/></div>
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rumah Sakit</label><input required className="w-full border-2 p-3 rounded-xl font-bold" value={newRequestData.hospital} onChange={e => setNewRequestData({...newRequestData, hospital: e.target.value})} placeholder="Lokasi Dirawat"/></div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Golongan</label><select className="w-full border-2 p-3 rounded-xl font-bold bg-white" value={newRequestData.bloodType} onChange={e => setNewRequestData({...newRequestData, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+                                <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rhesus</label><select className="w-full border-2 p-3 rounded-xl font-bold bg-white" value={newRequestData.rhesus} onChange={e => setNewRequestData({...newRequestData, rhesus: e.target.value})}><option>+</option><option>-</option></select></div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Jumlah</label><input required type="number" className="w-full border-2 p-3 rounded-xl font-bold" value={newRequestData.amount} onChange={e => setNewRequestData({...newRequestData, amount: e.target.value})} placeholder="Kantong"/></div>
+                                <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Kontak WA</label><input required className="w-full border-2 p-3 rounded-xl font-bold" value={newRequestData.contact} onChange={e => setNewRequestData({...newRequestData, contact: e.target.value})} placeholder="08..."/></div>
+                            </div>
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Kontak Alternatif (Opsional)</label><input className="w-full border-2 p-3 rounded-xl font-bold" value={newRequestData.contact2} onChange={e => setNewRequestData({...newRequestData, contact2: e.target.value})} placeholder="08..."/></div>
+                            
+                            <div className="flex gap-3 pt-4">
+                                <button type="button" onClick={() => setIsAddingRequest(false)} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold uppercase text-xs">Batal</button>
+                                <button type="submit" className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold uppercase text-xs">Simpan Data</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL TAMBAH RELAWAN */}
+            {isAddingVolunteer && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl animate-fadeIn overflow-y-auto max-h-[90vh]">
+                        <h3 className="text-2xl font-bold text-slate-800 mb-6">Tambah Relawan Baru</h3>
+                        <form onSubmit={handleSaveNewVolunteer} className="space-y-4">
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama Lengkap</label><input required className="w-full border-2 p-3 rounded-xl font-bold" value={newVolunteerData.name} onChange={e => setNewVolunteerData({...newVolunteerData, name: e.target.value})} placeholder="Nama Sesuai KTP"/></div>
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Alamat Domisili</label><input required className="w-full border-2 p-3 rounded-xl font-bold" value={newVolunteerData.address} onChange={e => setNewVolunteerData({...newVolunteerData, address: e.target.value})} placeholder="Alamat Lengkap"/></div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Golongan</label><select className="w-full border-2 p-3 rounded-xl font-bold bg-white" value={newVolunteerData.bloodType} onChange={e => setNewVolunteerData({...newVolunteerData, bloodType: e.target.value})}><option>A</option><option>B</option><option>AB</option><option>O</option></select></div>
+                                <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rhesus</label><select className="w-full border-2 p-3 rounded-xl font-bold bg-white" value={newVolunteerData.rhesus} onChange={e => setNewVolunteerData({...newVolunteerData, rhesus: e.target.value})}><option>+</option><option>-</option></select></div>
+                            </div>
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Donor Terakhir (Opsional)</label><input type="date" className="w-full border-2 p-3 rounded-xl font-bold" value={newVolunteerData.lastDonorDate} onChange={e => setNewVolunteerData({...newVolunteerData, lastDonorDate: e.target.value})}/></div>
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">WhatsApp Aktif</label><input required className="w-full border-2 p-3 rounded-xl font-bold" value={newVolunteerData.phone} onChange={e => setNewVolunteerData({...newVolunteerData, phone: e.target.value})} placeholder="08..."/></div>
+                            
+                            <div className="flex gap-3 pt-4">
+                                <button type="button" onClick={() => setIsAddingVolunteer(false)} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold uppercase text-xs">Batal</button>
+                                <button type="submit" className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold uppercase text-xs">Simpan Relawan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+            
+            {/* MODAL TAMBAH USER */}
+            {isAddingUser && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl animate-fadeIn">
+                        <h3 className="text-2xl font-bold text-slate-800 mb-6">Tambah User Admin</h3>
+                        <form onSubmit={handleSaveNewUser} className="space-y-4">
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Username</label><input required className="w-full border-2 p-3 rounded-xl font-bold" value={newUserData.username} onChange={e => setNewUserData({...newUserData, username: e.target.value})} placeholder="Username Baru"/></div>
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Password</label><input required type="password" className="w-full border-2 p-3 rounded-xl font-bold" value={newUserData.password} onChange={e => setNewUserData({...newUserData, password: e.target.value})} placeholder="Password"/></div>
+                            <div><label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Role</label><select className="w-full border-2 p-3 rounded-xl font-bold bg-white" value={newUserData.role} onChange={e => setNewUserData({...newUserData, role: e.target.value})}><option>Admin</option><option>Super Admin</option></select></div>
+                            
+                            <div className="flex gap-3 pt-4">
+                                <button type="button" onClick={() => setIsAddingUser(false)} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold uppercase text-xs">Batal</button>
+                                <button type="submit" className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold uppercase text-xs">Simpan User</button>
                             </div>
                         </form>
                     </div>
@@ -957,6 +1144,7 @@ const App = () => {
   const [volunteers, setVolunteers] = useState(FALLBACK_DATA.volunteers);
   const [requests, setRequests] = useState(FALLBACK_DATA.requests);
   const [mobileUnit, setMobileUnit] = useState(FALLBACK_DATA.mobileUnit);
+  const [users, setUsers] = useState(FALLBACK_DATA.users);
 
   const showToast = (message, type = 'info') => setToast({ message, type });
 
@@ -964,21 +1152,18 @@ const App = () => {
     setLoadingData(true);
     try {
       const ts = Date.now();
-      const [vRes, rRes, mRes, pRes] = await Promise.all([
-        fetch(`${APPS_SCRIPT_URL}?action=read&sheet=volunteers&t=${ts}`),
-        fetch(`${APPS_SCRIPT_URL}?action=read&sheet=requests&t=${ts}`),
-        fetch(`${APPS_SCRIPT_URL}?action=read&sheet=mobileUnit&t=${ts}`),
-        fetch(`${APPS_SCRIPT_URL}?action=read&sheet=pmiStock&t=${ts}`)
+      const [vRes, rRes, mRes, pRes, uRes] = await Promise.all([
+        fetch(`${APPS_SCRIPT_URL}?action=read&sheet=volunteers&t=${ts}`).then(res => res.ok ? res.json() : { status: 'error', data: FALLBACK_DATA.volunteers }),
+        fetch(`${APPS_SCRIPT_URL}?action=read&sheet=requests&t=${ts}`).then(res => res.ok ? res.json() : { status: 'error', data: FALLBACK_DATA.requests }),
+        fetch(`${APPS_SCRIPT_URL}?action=read&sheet=mobileUnit&t=${ts}`).then(res => res.ok ? res.json() : { status: 'error', data: FALLBACK_DATA.mobileUnit }),
+        fetch(`${APPS_SCRIPT_URL}?action=read&sheet=pmiStock&t=${ts}`).then(res => res.ok ? res.json() : { status: 'error', data: FALLBACK_DATA.pmiStock }),
+        fetch(`${APPS_SCRIPT_URL}?action=read&sheet=users&t=${ts}`).then(res => res.ok ? res.json() : { status: 'error', data: FALLBACK_DATA.users })
       ]);
-      const vData = await vRes.json();
-      const rData = await rRes.json();
-      const mData = await mRes.json();
-      const pData = await pRes.json();
 
-      if(vData.status === 'success') {
-          setVolunteers(vData.data);
+      if(vRes.status === 'success') {
+          setVolunteers(vRes.data);
           const stock = { A: { positive: 0, negative: 0 }, B: { positive: 0, negative: 0 }, AB: { positive: 0, negative: 0 }, O: { positive: 0, negative: 0 }};
-          vData.data.forEach(v => {
+          vRes.data.forEach(v => {
               if(v.status === 'Aktif' && stock[v.bloodType]) {
                   const key = String(v.rhesus).includes('+') ? 'positive' : 'negative';
                   stock[v.bloodType][key]++;
@@ -986,15 +1171,20 @@ const App = () => {
           });
           setBloodStock(stock);
       }
-      if(rData.status === 'success') setRequests(rData.data);
+      if(rRes.status === 'success') setRequests(rRes.data);
       
-      if(mData.status === 'success') {
+      if(mRes.status === 'success') {
           const today = new Date();
           today.setHours(0, 0, 0, 0); 
-          setMobileUnit(mData.data.filter(item => !item.date || new Date(item.date) >= today));
+          setMobileUnit(mRes.data.filter(item => !item.date || new Date(item.date) >= today));
       }
-      if(pData.status === 'success') setPmiStock(pData.data.sort((a,b) => a.id - b.id));
-    } catch (e) { console.error(e); } finally { setLoadingData(false); }
+      if(pRes.status === 'success') setPmiStock(pRes.data.sort((a,b) => a.id - b.id));
+      if(uRes.status === 'success') setUsers(uRes.data);
+    } catch (e) { 
+        console.warn("Menggunakan data offline/fallback karena fetch gagal."); 
+    } finally { 
+        setLoadingData(false); 
+    }
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -1026,7 +1216,7 @@ const App = () => {
   };
 
   if(view === 'login') return <Login onLogin={() => { setIsLoggedIn(true); setView('admin'); }} onBack={() => setView('home')} />;
-  if(view === 'admin' && isLoggedIn) return <AdminPanel volunteers={volunteers} setVolunteers={setVolunteers} requests={requests} setRequests={setRequests} pmiStock={pmiStock} setPmiStock={setPmiStock} mobileUnit={mobileUnit} setMobileUnit={setMobileUnit} onLogout={() => { setIsLoggedIn(false); setView('home'); }} showToast={showToast} />;
+  if(view === 'admin' && isLoggedIn) return <AdminPanel volunteers={volunteers} setVolunteers={setVolunteers} requests={requests} setRequests={setRequests} pmiStock={pmiStock} setPmiStock={setPmiStock} mobileUnit={mobileUnit} setMobileUnit={setMobileUnit} users={users} setUsers={setUsers} onLogout={() => { setIsLoggedIn(false); setView('home'); }} showToast={showToast} />;
 
   return (
     <div className="font-sans antialiased text-slate-900 bg-white text-left">
