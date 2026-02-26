@@ -90,6 +90,7 @@ const sendDataToSheet = async (sheetName, data, action = 'write') => {
   if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("PASTE_URL")) return false;
   
   const sanitizedData = { ...data };
+  // Prefix ' agar tidak error di Spreadsheet
   if (sanitizedData.rhesus && !String(sanitizedData.rhesus).startsWith("'")) sanitizedData.rhesus = `'${sanitizedData.rhesus}`;
   if (sanitizedData.contact && !String(sanitizedData.contact).startsWith("'")) sanitizedData.contact = `'${sanitizedData.contact}`;
   if (sanitizedData.contact2 && !String(sanitizedData.contact2).startsWith("'")) sanitizedData.contact2 = `'${sanitizedData.contact2}`;
@@ -412,6 +413,26 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
       <section className="py-20 bg-red-50/50 min-h-screen text-left">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12"><h2 className="text-3xl font-bold text-slate-800 mb-2 uppercase tracking-tight text-center">Pasien Butuh Darah</h2><p className="text-slate-500 text-center">Daftar pasien yang mendesak membutuhkan bantuan donor.</p></div>
+          
+          {sharedId && (
+            <div className="mb-12 text-center animate-fadeIn">
+                <div className="inline-flex items-center gap-3 bg-white px-5 py-3 rounded-full shadow-md border border-slate-100">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span className="text-sm font-semibold text-slate-600">Pencarian Khusus dari Tautan</span>
+                </div>
+                <br/><br/>
+                <button 
+                    onClick={() => { 
+                        setSharedId(null); 
+                        window.history.replaceState({}, document.title, window.location.pathname); 
+                    }} 
+                    className="inline-flex items-center gap-2 bg-slate-800 text-white px-6 py-2.5 rounded-full font-bold hover:bg-slate-700 transition-all text-sm shadow-lg mx-auto"
+                >
+                    <ArrowLeft size={16}/> Lihat Semua Pasien
+                </button>
+            </div>
+          )}
+
           {!sharedId && (
             <div className="flex flex-col items-center gap-6 mb-12 text-center">
               <div className="relative w-full max-w-lg">
@@ -489,9 +510,11 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
                 </div>
               ))}
           </div>
-          <div className="mt-16 text-center">
-             <button onClick={() => setView('search')} className="px-8 py-3.5 bg-[#800000] text-white rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-900 transition-all hover:-translate-y-1 uppercase tracking-wide text-sm flex items-center gap-2 mx-auto"><PlusCircle size={18}/> Ajukan Permohonan Darah</button>
-          </div>
+          {!sharedId && (
+              <div className="mt-16 text-center">
+                 <button onClick={() => setView('search')} className="px-8 py-3.5 bg-[#800000] text-white rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-900 transition-all hover:-translate-y-1 uppercase tracking-wide text-sm flex items-center gap-2 mx-auto"><PlusCircle size={18}/> Ajukan Permohonan Darah</button>
+              </div>
+          )}
           {sortedRequests.length === 0 && <div className="text-center py-20 text-slate-400 italic">Tidak ada data ditemukan.</div>}
         </div>
         {posterData && <IGPosterModal patient={posterData} onClose={() => setPosterData(null)} />}
@@ -1158,6 +1181,7 @@ const App = () => {
   const [userRole, setUserRole] = useState('');
   const [loadingData, setLoadingData] = useState(false);
   const [toast, setToast] = useState(null);
+  const [sharedId, setSharedId] = useState(null);
 
   const [bloodStock, setBloodStock] = useState(FALLBACK_DATA.bloodStock);
   const [pmiStock, setPmiStock] = useState(FALLBACK_DATA.pmiStock);
@@ -1207,7 +1231,21 @@ const App = () => {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { 
+    fetchData(); 
+    
+    // Deep Linking: Cek parameter URL
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get('view');
+    const idParam = params.get('id');
+
+    if (viewParam) {
+        setView(viewParam);
+    }
+    if (idParam) {
+        setSharedId(idParam);
+    }
+  }, []);
 
   const handleRequestSubmit = async (formData) => {
     setLoadingData(true);
@@ -1270,7 +1308,7 @@ const App = () => {
           <AboutStats volunteers={volunteers} requests={requests} />
         </div>
       )}
-      {view === 'patient_list' && <PatientList requests={requests} setView={setView} showToast={showToast} />}
+      {view === 'patient_list' && <PatientList requests={requests} setView={setView} showToast={showToast} sharedId={sharedId} setSharedId={setSharedId} />}
       {view === 'volunteer_list' && <VolunteerList volunteers={volunteers} setView={setView} />}
       {view === 'stock' && <StockDashboard bloodStock={bloodStock} pmiStock={pmiStock} mobileUnit={mobileUnit} />}
       {view === 'search' && <div className="py-20 bg-slate-50 min-h-screen text-center text-left"><div className="container mx-auto px-4 text-left"><h1 className="text-3xl font-black mb-12 uppercase text-center">Pasien Butuh Darah</h1><RequestForm onSubmit={handleRequestSubmit} isLoading={loadingData} /></div></div>}
