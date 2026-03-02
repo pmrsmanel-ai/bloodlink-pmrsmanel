@@ -38,10 +38,37 @@ const FALLBACK_DATA = {
   users: []
 };
 
-const ARTICLES = [
-  { id: 1, title: "Syarat Menjadi Pendonor Darah", excerpt: "Ketahui syarat fisik sebelum donor.", content: ["Sehat jasmani dan rohani.", "Usia 17-60 tahun.", "Berat badan minimal 45 kg.", "Tidak sedang sakit."], image: "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=500" },
-  { id: 2, title: "Mitos vs Fakta Donor Darah", excerpt: "Simak faktanya di sini.", content: ["❌ Mitos: Donor darah bikin gemuk.", "✅ Fakta: Justru membakar kalori.", "❌ Mitos: Menyakitkan.", "✅ Fakta: Hanya seperti gigitan semut."], image: "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=500" },
-  { id: 3, title: "Manfaat Donor Bagi Kesehatan", excerpt: "Tubuh menjadi lebih sehat.", content: ["Menurunkan risiko penyakit jantung.", "Mengurangi kekentalan darah.", "Pemeriksaan kesehatan gratis."], image: "https://images.unsplash.com/photo-1584362917165-526a968579e8?auto=format&fit=crop&q=80&w=500" }
+const FAQ_DATA = [
+  { 
+    id: 1, 
+    question: "Apa syarat utama untuk mendonorkan darah?", 
+    answer: "Untuk dapat mendonorkan darah, Anda harus: Berusia 17-60 tahun (usia 17 tahun diperbolehkan menjadi donor bila mendapat izin tertulis dari orangtua), Berat badan minimal 45 kg, Temperatur tubuh 36,6 - 37,5 derajat Celcius, Tekanan darah baik yaitu sistole = 110-160 mmHg, diastole = 70-100 mmHg, Denyut nadi teratur yaitu sekitar 50-100 kali/menit, Hemoglobin perempuan minimal 12 gram, sedangkan untuk laki-laki minimal 12,5 gram."
+  },
+  { 
+    id: 2, 
+    question: "Berapa lama waktu yang dibutuhkan untuk proses donor darah?", 
+    answer: "Proses pengambilan darah (dari mulai ditusuk jarum hingga selesai) biasanya hanya memakan waktu sekitar 10 hingga 15 menit. Namun, secara keseluruhan (termasuk pendaftaran, pemeriksaan kesehatan, dan istirahat pasca donor), Anda membutuhkan waktu sekitar 45 menit hingga 1 jam."
+  },
+  { 
+    id: 3, 
+    question: "Berapa jeda waktu untuk bisa donor darah kembali?", 
+    answer: "Untuk donor darah lengkap (Whole Blood), Anda bisa kembali mendonorkan darah setelah 60 hari (sekitar 2 bulan) untuk laki-laki, dan 90 hari (3 bulan) untuk perempuan. Frekuensi donor maksimal adalah 5-6 kali dalam setahun."
+  },
+  { 
+    id: 4, 
+    question: "Apakah donor darah itu menyakitkan?", 
+    answer: "Anda hanya akan merasakan sakit sedikit seperti cubitan kecil atau gigitan semut saat jarum pertama kali dimasukkan. Setelah jarum berada di dalam, Anda seharusnya tidak merasa sakit."
+  },
+  { 
+    id: 5, 
+    question: "Apa yang harus saya lakukan sebelum mendonorkan darah?", 
+    answer: "Pastikan Anda tidur yang cukup di malam hari sebelum donor. Makanlah makanan yang bergizi dan hindari makanan berlemak tinggi. Minum banyak cairan (air putih) setidaknya 3-4 jam sebelum donor. Jangan lupa bawa kartu identitas diri."
+  },
+  {
+    id: 6,
+    question: "Siapa saja yang tidak diperbolehkan donor darah?",
+    answer: "Anda tidak boleh mendonorkan darah jika: Sedang demam, flu, atau batuk; Sedang hamil, menyusui, atau menstruasi; Memiliki penyakit jantung, paru-paru, kanker, atau kelainan darah; Memiliki riwayat Hepatitis B/C, HIV/AIDS, atau Sifilis; Memiliki tato, tindik, atau tindik telinga dalam 6 bulan terakhir; Sedang mengonsumsi obat-obatan tertentu (konsultasikan dengan dokter PMI)."
+  }
 ];
 
 // ============================================================================
@@ -211,7 +238,7 @@ const IGPosterModal = ({ patient, onClose }) => {
 const Navbar = ({ setView, view, isLoggedIn }) => {
     const [isOpen, setIsOpen] = useState(false);
     const navItems = [
-      { label: 'Home', value: 'home' }, { label: 'Butuh Donor', value: 'patient_list' }, { label: 'Data Relawan', value: 'volunteer_list' }, { label: 'Stok Darah', value: 'stock' }, { label: 'Edukasi', value: 'education' }
+      { label: 'Home', value: 'home' }, { label: 'Butuh Donor', value: 'patient_list' }, { label: 'Data Relawan', value: 'volunteer_list' }, { label: 'Stok Darah', value: 'stock' }, { label: 'FAQ', value: 'faq' }
     ];
     return (
       <nav className="sticky top-0 z-50 bg-gradient-to-r from-[#800000] to-red-900 shadow-lg font-sans">
@@ -1137,36 +1164,53 @@ const VolunteerForm = ({ onSubmit, isLoading }) => {
   );
 };
 
-const Education = ({ articles }) => {
-    const [sel, setSel] = useState(null);
+const FAQComponent = ({ faqs }) => {
+    const [openId, setOpenId] = useState(null);
+
+    const toggleFaq = (id) => {
+        setOpenId(openId === id ? null : id);
+    };
+
     return (
-        <section className="py-20 bg-white min-h-screen text-left">
-            <div className="container mx-auto px-4 text-left">
-                <div className="text-center mb-16 text-left"><h2 className="text-3xl font-black uppercase mb-2 text-center">Pojok Edukasi</h2><p className="text-slate-500 text-center">Pelajari donor darah lebih dalam.</p></div>
-                <div className="grid md:grid-cols-3 gap-8 text-left">
-                    {articles.map(art => (
-                        <div key={art.id} className="bg-slate-50 rounded-[2.5rem] overflow-hidden group cursor-pointer text-left" onClick={() => setSel(art)}>
-                            <div className="h-52 overflow-hidden text-left"><img src={art.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 text-left" alt={art.title}/></div>
-                            <div className="p-8 text-left">
-                                <h3 className="font-bold text-lg mb-2 text-left">{art.title}</h3>
-                                <p className="text-xs text-slate-500 mb-6 text-left">{art.excerpt}</p>
-                                <button className="text-[10px] font-black uppercase tracking-widest text-red-700 flex items-center gap-2 text-left">Baca Sekarang <ChevronRight size={14}/></button>
+        <section className="py-20 bg-slate-50 min-h-screen text-left">
+            <div className="container mx-auto px-4 max-w-4xl text-left">
+                <div className="text-center mb-16 text-left">
+                    <h2 className="text-3xl font-black uppercase mb-2 text-center text-[#800000]">FAQ Donor Darah</h2>
+                    <p className="text-slate-500 text-center">Pertanyaan yang sering diajukan seputar donor darah.</p>
+                </div>
+                
+                <div className="space-y-4">
+                    {faqs.map(faq => (
+                        <div key={faq.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-200">
+                            <button 
+                                onClick={() => toggleFaq(faq.id)} 
+                                className="w-full px-6 py-5 text-left flex justify-between items-center focus:outline-none hover:bg-slate-50 transition-colors"
+                            >
+                                <span className="font-bold text-slate-800 pr-8">{faq.question}</span>
+                                <div className={`transform transition-transform duration-300 text-[#800000] ${openId === faq.id ? 'rotate-90' : 'rotate-0'}`}>
+                                    {openId === faq.id ? <X size={20} /> : <PlusCircle size={20} />}
+                                </div>
+                            </button>
+                            
+                            <div 
+                                className={`px-6 overflow-hidden transition-all duration-300 ease-in-out ${openId === faq.id ? 'max-h-96 py-5 border-t border-slate-100 opacity-100' : 'max-h-0 py-0 opacity-0'}`}
+                            >
+                                <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
+                                    {faq.answer}
+                                </p>
                             </div>
                         </div>
                     ))}
                 </div>
-            </div>
-            {sel && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md text-left">
-                    <div className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[85vh] overflow-y-auto relative p-10 text-left">
-                        <button onClick={() => setSel(null)} className="absolute top-6 right-6 p-2 bg-slate-100 rounded-full text-left"><X size={20}/></button>
-                        <h2 className="text-2xl font-black mb-6 uppercase text-left">{sel.title}</h2>
-                        <ul className="space-y-4 text-left">
-                            {sel.content.map((c, i) => <li key={i} className="flex gap-4 text-left text-left"><div className="w-5 h-5 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-1 text-left">{i+1}</div>{c}</li>)}
-                        </ul>
-                    </div>
+
+                <div className="mt-16 text-center bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+                    <h3 className="font-bold text-lg mb-2">Masih punya pertanyaan?</h3>
+                    <p className="text-slate-500 text-sm mb-6">Jangan ragu untuk menghubungi tim PMR SMANEL.</p>
+                    <a href="https://www.instagram.com/pmr_smanel/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-[#800000] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-red-900 transition-colors">
+                        <Instagram size={18}/> Hubungi via Instagram
+                    </a>
                 </div>
-            )}
+            </div>
         </section>
     );
 };
@@ -1313,7 +1357,7 @@ const App = () => {
       {view === 'stock' && <StockDashboard bloodStock={bloodStock} pmiStock={pmiStock} mobileUnit={mobileUnit} />}
       {view === 'search' && <div className="py-20 bg-slate-50 min-h-screen text-center text-left"><div className="container mx-auto px-4 text-left"><h1 className="text-3xl font-black mb-12 uppercase text-center">Pasien Butuh Darah</h1><RequestForm onSubmit={handleRequestSubmit} isLoading={loadingData} /></div></div>}
       {view === 'register' && <div className="py-20 bg-slate-50 min-h-screen text-center text-left"><div className="container mx-auto px-4 text-left"><h1 className="text-3xl font-black mb-12 uppercase text-center text-left">Daftar Sebagai Relawan</h1><VolunteerForm onSubmit={handleVolunteerSubmit} isLoading={loadingData} /></div></div>}
-      {view === 'education' && <Education articles={ARTICLES} />}
+      {view === 'faq' && <FAQComponent faqs={FAQ_DATA} />}
       <Footer setView={setView} />
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
