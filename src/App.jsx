@@ -231,6 +231,93 @@ const IGPosterModal = ({ patient, onClose }) => {
   );
 };
 
+const PMIPosterModal = ({ pmiStock, date, onClose }) => {
+  const posterRef = useRef(null);
+  const [downloading, setDownloading] = useState(false);
+  const [libLoaded, setLibLoaded] = useState(false);
+
+  useEffect(() => {
+    if (window.html2canvas) { setLibLoaded(true); return; }
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+    script.async = true;
+    script.onload = () => setLibLoaded(true);
+    document.body.appendChild(script);
+  }, []);
+
+  const handleDownload = async () => {
+    if (!posterRef.current || !window.html2canvas) return;
+    setDownloading(true);
+    try {
+      await document.fonts.ready;
+      window.scrollTo(0, 0); 
+      await new Promise(r => setTimeout(r, 1000));
+      const canvas = await window.html2canvas(posterRef.current, { scale: 3, useCORS: true, backgroundColor: null, scrollX: 0, scrollY: 0 });
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = `Stok-Darah-PMI-${date.replace(/\s+/g, '-')}.png`;
+      link.click();
+    } catch(e) { console.error(e); } finally { setDownloading(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[99999] flex items-start justify-center bg-slate-900/90 backdrop-blur-md p-4 pt-10 animate-fadeIn overflow-y-auto">
+      <div className="relative w-full max-w-[400px] flex flex-col items-center">
+        <button onClick={onClose} className="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-full mb-8 flex items-center gap-2 font-semibold backdrop-blur-md transition-all text-sm border border-white/10 shadow-lg"><X size={18} /> Tutup Preview</button>
+        <div ref={posterRef} className="w-[360px] flex-shrink-0 bg-white shadow-2xl relative overflow-hidden box-border rounded-[24px] border border-gray-100">
+          
+          <div className="bg-gradient-to-r from-red-600 to-[#800000] px-6 py-8 text-white relative z-10 text-center">
+             <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg text-[#800000]">
+                 <Activity size={32} />
+             </div>
+             <h3 className="font-black text-2xl leading-none uppercase tracking-tight mb-2">Info Stok Darah</h3>
+             <p className="text-[10px] font-bold opacity-90 tracking-widest text-red-100 uppercase">UTD PMI Lombok Timur</p>
+             <div className="inline-block bg-black/20 backdrop-blur-sm px-4 py-1.5 rounded-full mt-4 border border-white/10">
+                 <p className="text-[10px] font-bold uppercase flex items-center gap-1.5"><Clock size={12}/> {date}</p>
+             </div>
+          </div>
+
+          <div className="px-6 py-8 bg-slate-50 text-left">
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                  <table className="w-full text-sm text-left border-collapse">
+                      <thead className="bg-slate-100 text-slate-600 text-left">
+                          <tr>
+                              <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider border-b-2 border-slate-200 text-left">Produk</th>
+                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">A</th>
+                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">B</th>
+                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">O</th>
+                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">AB</th>
+                          </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white text-left">
+                          {pmiStock.length > 0 ? pmiStock.map((row, i) => (
+                                  <tr key={i}>
+                                      <td className="px-4 py-3.5 font-bold text-slate-700 bg-slate-50">{row.product}</td>
+                                      <td className="px-3 py-3 text-center text-slate-700 font-medium border-l border-slate-100">{row.A}</td>
+                                      <td className="px-3 py-3 text-center text-slate-700 font-medium border-l border-slate-100">{row.B}</td>
+                                      <td className="px-3 py-3 text-center text-slate-700 font-medium border-l border-slate-100">{row.O}</td>
+                                      <td className="px-3 py-3 text-center text-slate-700 font-medium border-l border-slate-100">{row.AB}</td>
+                                  </tr>
+                          )) : <tr><td colSpan="5" className="p-6 text-center text-slate-400 text-xs italic">Data tidak tersedia.</td></tr>}
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+
+          <div className="bg-slate-900 py-6 px-6 text-center rounded-b-[24px]">
+             <p className="text-[10px] text-slate-400 mb-3 font-medium uppercase tracking-widest">Informasi Disajikan Oleh</p>
+             <div className="flex justify-center items-center gap-4 text-white">
+                 <div className="flex items-center"><Instagram size={14} className="text-red-400 mr-2"/><span className="text-xs font-bold tracking-wide">@pmr_smanel</span></div>
+             </div>
+          </div>
+        </div>
+        <button onClick={handleDownload} disabled={downloading || !libLoaded} className="mt-8 w-full py-4 bg-white text-[#800000] rounded-2xl font-bold text-sm uppercase tracking-widest shadow-xl hover:bg-red-50 transition-all flex items-center justify-center gap-3 disabled:opacity-70">{downloading ? <Loader size={18} className="animate-spin" /> : <Download size={18} />} {downloading ? 'Memproses...' : 'Simpan Gambar'}</button>
+      </div>
+    </div>
+  );
+};
+
 // ============================================================================
 // 4. NAV & CONTENT COMPONENTS
 // ============================================================================
@@ -297,19 +384,33 @@ const Hero = ({ setView }) => (
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button onClick={() => setView('patient_list')} className="w-full sm:w-auto px-8 py-4 bg-[#800000] text-white rounded-2xl shadow-xl shadow-red-200 hover:bg-red-900 hover:-translate-y-1 transition-all font-bold flex items-center justify-center gap-3 text-sm uppercase tracking-wide">
-              <Search size={18} /> Lihat Pasien Butuh Darah
+              <Search size={18} /> Pasien Butuh Darah
           </button>
           <button onClick={() => setView('register')} className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl shadow-lg hover:shadow-xl hover:border-red-200 transition-all font-bold flex items-center justify-center gap-3 text-sm uppercase tracking-wide group">
-              <UserPlus size={18} className="text-slate-400 group-hover:text-[#800000] transition-colors"/> Saya Ingin Donor Darah
+              <UserPlus size={18} className="text-slate-400 group-hover:text-[#800000] transition-colors"/> Daftar Sebagai Relawan
           </button>
         </div>
       </div>
     </header>
 );
 
-const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
+const StockDashboard = ({ bloodStock, pmiStock, mobileUnit, showToast }) => {
+    const [showPoster, setShowPoster] = useState(false);
     const totalVolunteers = Object.values(bloodStock).reduce((acc, curr) => acc + curr.positive + curr.negative, 0);
     const currentDate = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    const handleSharePmi = async () => {
+        const shareUrl = `${window.location.origin}?view=stock`;
+        let tableText = pmiStock.map(r => `• ${r.product}: A(${r.A}) B(${r.B}) O(${r.O}) AB(${r.AB})`).join('\n');
+        const baseText = `🩸 *INFO STOK DARAH UTD PMI LOMBOK TIMUR* 🩸\n\nUpdate: ${currentDate}\n\n${tableText}\n\nCek selengkapnya dan daftar jadi relawan di BloodLink PMR SMANEL:\n`;
+        
+        if (navigator.share) {
+            try { await navigator.share({ title: 'Stok Darah PMI', text: baseText, url: shareUrl }); } catch (err) {}
+        } else {
+            navigator.clipboard.writeText(`${baseText}\n${shareUrl}`);
+            if(showToast) showToast('Informasi stok disalin ke clipboard!', 'success');
+        }
+    };
 
     return (
       <section className="py-20 bg-white">
@@ -348,13 +449,18 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
             </div>
             <div className="space-y-6">
               <div className="bg-white p-8 rounded-3xl border-2 border-slate-200 shadow-xl shadow-slate-100/50">
-                <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3 uppercase"><Activity className="text-[#800000]" /> Stok Darah PMI Lombok Timur</h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1 text-left">Info Stok Darah UTD</p>
+                        <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3 uppercase"><Activity className="text-[#800000]" /> Stok Darah PMI</h3>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mt-1.5"><Clock size={10}/> Update: {currentDate}</p>
                     </div>
-                    <div className="bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1"><Clock size={10}/> Update: {currentDate}</p>
+                    <div className="flex gap-2">
+                        <button onClick={handleSharePmi} className="bg-slate-100 text-blue-600 p-2 rounded-xl hover:bg-blue-50 transition-colors shadow-sm" title="Bagikan Link">
+                            <Share2 size={18}/>
+                        </button>
+                        <button onClick={() => setShowPoster(true)} className="bg-red-50 text-[#800000] p-2 rounded-xl hover:bg-red-100 transition-colors shadow-sm" title="Buat Poster IG">
+                            <Instagram size={18}/>
+                        </button>
                     </div>
                 </div>
                 <div className="overflow-x-auto rounded-xl border-2 border-slate-200 text-left">
@@ -401,6 +507,7 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit }) => {
             </div>
           </div>
         </div>
+        {showPoster && <PMIPosterModal pmiStock={pmiStock} date={currentDate} onClose={() => setShowPoster(false)} />}
       </section>
     );
 };
@@ -730,6 +837,7 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
     };
 
     const handleDeleteSchedule = async (id) => {
+        if(!window.confirm('Hapus jadwal ini?')) return;
         setMobileUnit(mobileUnit.filter(m => m.id !== id));
         await sendDataToSheet('mobileUnit', { id }, 'delete');
         showToast("Jadwal dihapus", "success");
@@ -1236,6 +1344,21 @@ const App = () => {
 
   const showToast = (message, type = 'info') => setToast({ message, type });
 
+  // Update document title and Favicon
+  useEffect(() => {
+    document.title = "BloodLink - PMR SMAN 1 Aikmel";
+    
+    // Create or update the favicon dynamically
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+    }
+    // Menggunakan emoji tetesan darah sebagai Favicon sederhana yang efektif
+    link.href = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩸</text></svg>";
+  }, []);
+
   const fetchData = async () => {
     setLoadingData(true);
     try {
@@ -1333,7 +1456,7 @@ const App = () => {
       {view === 'home' && (
         <div className="animate-fadeIn text-left">
           <Hero setView={setView} />
-          <StockDashboard bloodStock={bloodStock} pmiStock={pmiStock} mobileUnit={mobileUnit} />
+          <StockDashboard bloodStock={bloodStock} pmiStock={pmiStock} mobileUnit={mobileUnit} showToast={showToast} />
           <section className="py-24 bg-gray-50 text-center border-t border-gray-200 text-left">
              <h2 className="text-3xl font-black text-gray-800 mb-12 uppercase text-center">Fitur Layanan</h2>
              <div className="flex justify-center gap-8 flex-wrap px-4 text-left">
@@ -1354,7 +1477,7 @@ const App = () => {
       )}
       {view === 'patient_list' && <PatientList requests={requests} setView={setView} showToast={showToast} sharedId={sharedId} setSharedId={setSharedId} />}
       {view === 'volunteer_list' && <VolunteerList volunteers={volunteers} setView={setView} />}
-      {view === 'stock' && <StockDashboard bloodStock={bloodStock} pmiStock={pmiStock} mobileUnit={mobileUnit} />}
+      {view === 'stock' && <StockDashboard bloodStock={bloodStock} pmiStock={pmiStock} mobileUnit={mobileUnit} showToast={showToast} />}
       {view === 'search' && <div className="py-20 bg-slate-50 min-h-screen text-center text-left"><div className="container mx-auto px-4 text-left"><h1 className="text-3xl font-black mb-12 uppercase text-center">Pasien Butuh Darah</h1><RequestForm onSubmit={handleRequestSubmit} isLoading={loadingData} /></div></div>}
       {view === 'register' && <div className="py-20 bg-slate-50 min-h-screen text-center text-left"><div className="container mx-auto px-4 text-left"><h1 className="text-3xl font-black mb-12 uppercase text-center text-left">Daftar Sebagai Relawan</h1><VolunteerForm onSubmit={handleVolunteerSubmit} isLoading={loadingData} /></div></div>}
       {view === 'faq' && <FAQComponent faqs={FAQ_DATA} />}
