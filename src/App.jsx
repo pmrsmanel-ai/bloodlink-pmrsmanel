@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Heart, Droplet, Search, UserPlus, BookOpen, Menu, X, Phone, MapPin, 
-  Shield, Activity, Calendar, CheckCircle, AlertCircle, LogOut, Edit3, 
-  Trash2, Save, Users, ChevronRight, PlusCircle, User, Info, Loader, 
-  RefreshCw, Facebook, Instagram, Youtube, Video, MessageCircle, Clock, 
+import {
+  Heart, Droplet, Search, UserPlus, BookOpen, Menu, X, Phone, MapPin,
+  Shield, Activity, Calendar, CheckCircle, AlertCircle, LogOut, Edit3,
+  Trash2, Save, Users, ChevronRight, PlusCircle, User, Info, Loader,
+  RefreshCw, Facebook, Instagram, Youtube, Video, MessageCircle, Clock,
   Share2, AlertTriangle, ArrowLeft, Camera, Download, Globe, Copy, Target, Rocket, UserCog
 } from 'lucide-react';
 
-// --- KONFIGURASI DATABASE ---
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxY5wb5lz39PyDKncKm1xb2LUDqU6etKZvHAQ9o7T1_ydO2YtmEbEpKeumeDZKOStX9ZQ/exec";
 
 // ============================================================================
@@ -39,29 +38,29 @@ const FALLBACK_DATA = {
 };
 
 const FAQ_DATA = [
-  { 
-    id: 1, 
-    question: "Apa syarat utama untuk mendonorkan darah?", 
+  {
+    id: 1,
+    question: "Apa syarat utama untuk mendonorkan darah?",
     answer: "Untuk dapat mendonorkan darah, Anda harus: Berusia 17-60 tahun (usia 17 tahun diperbolehkan menjadi donor bila mendapat izin tertulis dari orangtua), Berat badan minimal 45 kg, Temperatur tubuh 36,6 - 37,5 derajat Celcius, Tekanan darah baik yaitu sistole = 110-160 mmHg, diastole = 70-100 mmHg, Denyut nadi teratur yaitu sekitar 50-100 kali/menit, Hemoglobin perempuan minimal 12 gram, sedangkan untuk laki-laki minimal 12,5 gram."
   },
-  { 
-    id: 2, 
-    question: "Berapa lama waktu yang dibutuhkan untuk proses donor darah?", 
+  {
+    id: 2,
+    question: "Berapa lama waktu yang dibutuhkan untuk proses donor darah?",
     answer: "Proses pengambilan darah (dari mulai ditusuk jarum hingga selesai) biasanya hanya memakan waktu sekitar 10 hingga 15 menit. Namun, secara keseluruhan (termasuk pendaftaran, pemeriksaan kesehatan, dan istirahat pasca donor), Anda membutuhkan waktu sekitar 45 menit hingga 1 jam."
   },
-  { 
-    id: 3, 
-    question: "Berapa jeda waktu untuk bisa donor darah kembali?", 
+  {
+    id: 3,
+    question: "Berapa jeda waktu untuk bisa donor darah kembali?",
     answer: "Untuk donor darah lengkap (Whole Blood), Anda bisa kembali mendonorkan darah setelah 60 hari (sekitar 2 bulan) untuk laki-laki, dan 90 hari (3 bulan) untuk perempuan. Frekuensi donor maksimal adalah 5-6 kali dalam setahun."
   },
-  { 
-    id: 4, 
-    question: "Apakah donor darah itu menyakitkan?", 
+  {
+    id: 4,
+    question: "Apakah donor darah itu menyakitkan?",
     answer: "Anda hanya akan merasakan sakit sedikit seperti cubitan kecil atau gigitan semut saat jarum pertama kali dimasukkan. Setelah jarum berada di dalam, Anda seharusnya tidak merasa sakit."
   },
-  { 
-    id: 5, 
-    question: "Apa yang harus saya lakukan sebelum mendonorkan darah?", 
+  {
+    id: 5,
+    question: "Apa yang harus saya lakukan sebelum mendonorkan darah?",
     answer: "Pastikan Anda tidur yang cukup di malam hari sebelum donor. Makanlah makanan yang bergizi dan hindari makanan berlemak tinggi. Minum banyak cairan (air putih) setidaknya 3-4 jam sebelum donor. Jangan lupa bawa kartu identitas diri."
   },
   {
@@ -75,9 +74,27 @@ const FAQ_DATA = [
 // 2. HELPER FUNCTIONS
 // ============================================================================
 
+// Fallback for clipboard copy due to iframe restrictions
+const copyToClipboard = (text) => {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.position = "fixed";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+  } catch (err) {
+    console.error('Unable to copy', err);
+  }
+  document.body.removeChild(textArea);
+};
+
 const cleanPhoneNumber = (phone) => {
   if (!phone) return "";
-  let cleaned = String(phone).replace(/\D/g, ''); 
+  let cleaned = String(phone).replace(/\D/g, '');
   if (cleaned.startsWith('0')) {
     cleaned = '62' + cleaned.slice(1);
   } else if (cleaned.startsWith('8')) {
@@ -89,7 +106,7 @@ const cleanPhoneNumber = (phone) => {
 const formatDateIndo = (dateString) => {
   if (!dateString) return "-";
   const date = new Date(dateString);
-  if (isNaN(date.getTime())) return dateString; 
+  if (isNaN(date.getTime())) return dateString;
   return new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(date);
 };
 
@@ -115,7 +132,7 @@ const calculateEligibility = (lastDate) => {
 
 const sendDataToSheet = async (sheetName, data, action = 'write') => {
   if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("PASTE_URL")) return false;
-  
+
   const sanitizedData = { ...data };
   // Prefix ' agar tidak error di Spreadsheet
   if (sanitizedData.rhesus && !String(sanitizedData.rhesus).startsWith("'")) sanitizedData.rhesus = `'${sanitizedData.rhesus}`;
@@ -124,10 +141,10 @@ const sendDataToSheet = async (sheetName, data, action = 'write') => {
   if (sanitizedData.phone && !String(sanitizedData.phone).startsWith("'")) sanitizedData.phone = `'${sanitizedData.phone}`;
 
   try {
-    await fetch(`${APPS_SCRIPT_URL}?action=${action}&sheet=${sheetName}`, { 
-      method: 'POST', 
-      mode: 'no-cors', 
-      body: JSON.stringify(sanitizedData) 
+    await fetch(`${APPS_SCRIPT_URL}?action=${action}&sheet=${sheetName}`, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(sanitizedData)
     });
     return true;
   } catch (e) { console.error(e); return false; }
@@ -146,6 +163,23 @@ const Toast = ({ message, type, onClose }) => {
       {type === 'error' && <AlertCircle size={24} className="text-red-100 shrink-0" />}
       <span className="font-semibold text-sm tracking-wide">{typeof message === 'string' ? message : 'Notifikasi'}</span>
       <button onClick={onClose} className="ml-auto hover:bg-white/20 p-1.5 rounded-full transition-colors"><X size={16}/></button>
+    </div>
+  );
+};
+
+const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-fadeIn text-center">
+         <AlertTriangle size={48} className="text-red-500 mx-auto mb-4" />
+         <h3 className="text-xl font-bold text-slate-800 mb-2">{title}</h3>
+         <p className="text-slate-500 mb-6 text-sm">{message}</p>
+         <div className="flex gap-3">
+           <button onClick={onCancel} className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">Batal</button>
+           <button onClick={onConfirm} className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold text-sm hover:bg-red-700 transition-colors">Ya, Lanjutkan</button>
+         </div>
+      </div>
     </div>
   );
 };
@@ -169,7 +203,7 @@ const IGPosterModal = ({ patient, onClose }) => {
     setDownloading(true);
     try {
       await document.fonts.ready;
-      window.scrollTo(0, 0); 
+      window.scrollTo(0, 0);
       await new Promise(r => setTimeout(r, 1000));
       const canvas = await window.html2canvas(posterRef.current, { scale: 3, useCORS: true, backgroundColor: null, scrollX: 0, scrollY: 0 });
       const image = canvas.toDataURL("image/png");
@@ -250,7 +284,7 @@ const PMIPosterModal = ({ pmiStock, date, onClose }) => {
     setDownloading(true);
     try {
       await document.fonts.ready;
-      window.scrollTo(0, 0); 
+      window.scrollTo(0, 0);
       await new Promise(r => setTimeout(r, 1000));
       const canvas = await window.html2canvas(posterRef.current, { scale: 3, useCORS: true, backgroundColor: null, scrollX: 0, scrollY: 0 });
       const image = canvas.toDataURL("image/png");
@@ -271,7 +305,7 @@ const PMIPosterModal = ({ pmiStock, date, onClose }) => {
              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg text-[#800000]">
                  <Activity size={32} />
              </div>
-             <h3 className="font-black text-2xl leading-none uppercase tracking-tight mb-2">Info Stok Darah</h3>
+             <h3 className="font-bold text-2xl leading-none uppercase tracking-tight mb-2">Info Stok Darah</h3>
              <p className="text-[10px] font-bold opacity-90 tracking-widest text-red-100 uppercase">UTD PMI Lombok Timur</p>
              <div className="inline-block bg-black/20 backdrop-blur-sm px-4 py-1.5 rounded-full mt-4 border border-white/10">
                  <p className="text-[10px] font-bold uppercase flex items-center gap-1.5"><Clock size={12}/> {date}</p>
@@ -284,10 +318,10 @@ const PMIPosterModal = ({ pmiStock, date, onClose }) => {
                       <thead className="bg-slate-100 text-slate-600 text-left">
                           <tr>
                               <th className="px-4 py-3 font-bold text-[10px] uppercase tracking-wider border-b-2 border-slate-200 text-left">Produk</th>
-                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">A</th>
-                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">B</th>
-                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">O</th>
-                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">AB</th>
+                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-[#800000]">A</th>
+                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-[#800000]">B</th>
+                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-[#800000]">O</th>
+                              <th className="px-3 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-[#800000]">AB</th>
                           </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 bg-white text-left">
@@ -407,7 +441,7 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit, showToast }) => {
         if (navigator.share) {
             try { await navigator.share({ title: 'Stok Darah PMI', text: baseText, url: shareUrl }); } catch (err) {}
         } else {
-            navigator.clipboard.writeText(`${baseText}\n${shareUrl}`);
+            copyToClipboard(`${baseText}\n${shareUrl}`);
             if(showToast) showToast('Informasi stok disalin ke clipboard!', 'success');
         }
     };
@@ -468,11 +502,11 @@ const StockDashboard = ({ bloodStock, pmiStock, mobileUnit, showToast }) => {
                       <thead className="bg-slate-100 text-slate-600 text-left">
                           <tr>
                               <th className="px-5 py-3 font-bold text-[10px] uppercase tracking-wider border-b-2 border-slate-200 text-left">Produk</th>
-                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center">A</th>
-                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center">B</th>
-                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center">O</th>
-                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center">AB</th>
-                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-center text-[#800000]">Total</th>
+                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200">A</th>
+                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200">B</th>
+                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200">O</th>
+                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200">AB</th>
+                              <th className="px-4 py-3 text-center font-bold border-b-2 border-l border-slate-200 text-[#800000]">Total</th>
                           </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200 bg-white text-left">
@@ -538,7 +572,7 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
       if (navigator.share) {
         try { await navigator.share({ title: 'Butuh Donor', text: baseText, url: shareUrl }); } catch (err) {}
       } else {
-        navigator.clipboard.writeText(`${baseText}\n${shareUrl}`);
+        copyToClipboard(`${baseText}\n${shareUrl}`);
         showToast('Link disalin ke clipboard!', 'success');
       }
     };
@@ -609,7 +643,7 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
                                 <p className="text-base font-bold text-slate-800 text-left">{req.contact}</p>
                                 <button 
                                     onClick={() => {
-                                        navigator.clipboard.writeText(req.contact);
+                                        copyToClipboard(req.contact);
                                         showToast('Nomor disalin!', 'success');
                                     }}
                                     className="p-1.5 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-all"
@@ -623,7 +657,7 @@ const PatientList = ({ requests, setView, showToast, sharedId, setSharedId }) =>
                                     <p className="text-xs text-slate-500 text-left">Alt: {req.contact2}</p>
                                     <button 
                                         onClick={() => {
-                                            navigator.clipboard.writeText(req.contact2);
+                                            copyToClipboard(req.contact2);
                                             showToast('Nomor alternatif disalin!', 'success');
                                         }}
                                         className="p-1 bg-slate-100 rounded-full text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-all"
@@ -793,6 +827,12 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
     const [newSched, setNewSched] = useState({ location: '', date: '', time: '' });
     const [editingVolunteer, setEditingVolunteer] = useState(null);
 
+    // States for confirm dialog
+    const [confirmAction, setConfirmAction] = useState(null);
+
+    // States for broadcast
+    const [broadcastRequest, setBroadcastRequest] = useState(null);
+
     // States for adding data
     const [isAddingRequest, setIsAddingRequest] = useState(false);
     const [isAddingVolunteer, setIsAddingVolunteer] = useState(false);
@@ -827,6 +867,19 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
         showToast(`Status diperbarui ke ${newStatus}`, 'success');
     };
 
+    const handleDeleteRequest = (id) => {
+        setConfirmAction({
+            title: "Hapus Permohonan",
+            message: "Apakah Anda yakin ingin menghapus data permohonan darah ini? Tindakan ini tidak dapat dibatalkan.",
+            onConfirm: async () => {
+                setRequests(requests.filter(r => r.id !== id));
+                await sendDataToSheet('requests', { id }, 'delete');
+                showToast("Permohonan berhasil dihapus", "success");
+                setConfirmAction(null);
+            }
+        });
+    };
+
     const handleAddSchedule = async (e) => {
         e.preventDefault();
         const item = { id: Date.now(), ...newSched };
@@ -836,11 +889,17 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
         showToast("Jadwal ditambahkan", "success");
     };
 
-    const handleDeleteSchedule = async (id) => {
-        if(!window.confirm('Hapus jadwal ini?')) return;
-        setMobileUnit(mobileUnit.filter(m => m.id !== id));
-        await sendDataToSheet('mobileUnit', { id }, 'delete');
-        showToast("Jadwal dihapus", "success");
+    const handleDeleteSchedule = (id) => {
+        setConfirmAction({
+            title: "Hapus Jadwal",
+            message: "Apakah Anda yakin ingin menghapus jadwal ini? Tindakan ini tidak dapat dibatalkan.",
+            onConfirm: async () => {
+                setMobileUnit(mobileUnit.filter(m => m.id !== id));
+                await sendDataToSheet('mobileUnit', { id }, 'delete');
+                showToast("Jadwal dihapus", "success");
+                setConfirmAction(null);
+            }
+        });
     };
 
     const handleUpdateVolunteer = async (e) => {
@@ -888,11 +947,17 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
         setNewUserData({ username: '', password: '', role: 'Admin' });
     };
     
-    const handleDeleteUser = async (id) => {
-        if(!window.confirm('Hapus user ini?')) return;
-        setUsers(users.filter(u => u.id !== id));
-        await sendDataToSheet('users', { id }, 'delete');
-        showToast("User dihapus", "success");
+    const handleDeleteUser = (id) => {
+        setConfirmAction({
+            title: "Hapus User",
+            message: "Apakah Anda yakin ingin menghapus user ini dari sistem?",
+            onConfirm: async () => {
+                setUsers(users.filter(u => u.id !== id));
+                await sendDataToSheet('users', { id }, 'delete');
+                showToast("User dihapus", "success");
+                setConfirmAction(null);
+            }
+        });
     };
 
     // Sort requests: 'Mencari' first
@@ -916,7 +981,7 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                     <button onClick={onLogout} className="w-full p-3 rounded-xl text-sm font-bold flex items-center gap-3 text-red-400 mt-20 hover:bg-red-400/10 text-left"><LogOut size={18}/> Logout</button>
                 </nav>
             </aside>
-            <main className="flex-1 p-8 overflow-y-auto h-screen text-left">
+            <main className="flex-1 p-8 overflow-y-auto h-screen text-left relative">
                 <header className="flex justify-between items-center mb-10 text-left">
                     <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight text-left">{activeTab === 'requests' ? 'Manajemen Permohonan' : activeTab === 'volunteers' ? 'Relawan Siap Donor' : activeTab === 'users' ? 'Manajemen User' : 'Stok & Jadwal PMI'}</h1>
                 </header>
@@ -939,17 +1004,76 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                                     {sortedAdminRequests.map(req => (
                                         <tr key={req.id} className="hover:bg-slate-50 transition-colors text-left">
                                             <td className="p-4 text-left"><p className="font-bold text-slate-800 leading-none mb-1 text-left">{req.patient}</p><p className="text-[10px] text-slate-400 font-bold uppercase text-left">{req.hospital}</p></td>
-                                            <td className="p-4 text-center font-bold text-red-600">{req.bloodType}{req.rhesus}</td>
+                                            <td className="p-4 text-center font-bold text-red-600">{req.bloodType}{safeText(req.rhesus)}</td>
                                             <td className="p-4 text-center"><span className={`text-[10px] px-3 py-1 rounded-full font-bold uppercase ${req.status === 'Mencari' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{req.status}</span></td>
                                             <td className="p-4 text-right">
-                                                <div className="flex justify-end gap-2 text-right">
+                                                <div className="flex justify-end gap-2 text-right items-center">
+                                                    {req.status === 'Mencari' && (
+                                                        <button onClick={() => setBroadcastRequest(req)} className="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all"><MessageCircle size={12}/> Broadcast WA</button>
+                                                    )}
                                                     <button onClick={() => toggleStatus(req.id)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all"><RefreshCw size={12}/> Ubah Status</button>
+                                                    <button onClick={() => handleDeleteRequest(req.id)} className="text-red-300 hover:text-red-600 p-2 transition-colors" title="Hapus Permohonan"><Trash2 size={16}/></button>
                                                 </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* MODAL BROADCAST WA */}
+                {broadcastRequest && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+                        <div className="bg-white rounded-3xl p-8 w-full max-w-3xl shadow-2xl animate-fadeIn overflow-y-auto max-h-[90vh] text-left">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-slate-800 mb-1 flex items-center gap-2"><MessageCircle className="text-emerald-500"/> Broadcast Permohonan Darah</h3>
+                                    <p className="text-sm text-slate-500">Kirim notifikasi ke relawan yang memiliki golongan darah sesuai.</p>
+                                </div>
+                                <button onClick={() => setBroadcastRequest(null)} className="text-slate-400 hover:text-red-500 p-2"><X size={24}/></button>
+                            </div>
+                            
+                            <div className="bg-red-50 border border-red-100 rounded-2xl p-5 mb-8 flex items-center gap-4">
+                                <div className="bg-white text-red-600 font-bold text-2xl w-14 h-14 flex items-center justify-center rounded-xl shadow-sm shrink-0">
+                                    {broadcastRequest.bloodType}{safeText(broadcastRequest.rhesus)}
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-slate-800 text-lg">{broadcastRequest.patient}</h4>
+                                    <p className="text-sm text-slate-600">Dibutuhkan: <span className="font-bold">{broadcastRequest.amount} Kantong</span> di {broadcastRequest.hospital}</p>
+                                </div>
+                            </div>
+
+                            <h4 className="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wider">Daftar Relawan Cocok & Siap Donor:</h4>
+                            <div className="space-y-3">
+                                {volunteers.filter(v => v.status === 'Aktif' && v.bloodType === broadcastRequest.bloodType && v.rhesus === broadcastRequest.rhesus && calculateEligibility(v.lastDonorDate).eligible).length > 0 ? (
+                                    volunteers.filter(v => v.status === 'Aktif' && v.bloodType === broadcastRequest.bloodType && v.rhesus === broadcastRequest.rhesus && calculateEligibility(v.lastDonorDate).eligible).map(vol => {
+                                        const msg = `Assalamu'alaikum/Halo Kak ${vol.name},\n\nPMR SMANEL menginformasikan bahwa saat ini ada pasien yang sedang sangat membutuhkan donor darah:\n\n*Nama Pasien:* ${broadcastRequest.patient}\n*Lokasi/RS:* ${broadcastRequest.hospital}\n*Gol. Darah:* ${broadcastRequest.bloodType}${safeText(broadcastRequest.rhesus)}\n*Kebutuhan:* ${broadcastRequest.amount} Kantong\n\nBerdasarkan data sistem kami, Kakak memiliki golongan darah yang sesuai dan sudah memenuhi masa jeda untuk donor kembali.\n\nJika Kakak sehat dan berkenan membantu, silakan langsung menghubungi kontak keluarga pasien di bawah ini:\nWA Keluarga: *${broadcastRequest.contact}*\n\nTerima kasih banyak atas kepedulian Kakak. Setetes darah Kakak, nyawa bagi sesama.`;
+                                        return (
+                                            <div key={vol.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl hover:border-emerald-300 transition-all shadow-sm">
+                                                <div>
+                                                    <p className="font-bold text-slate-800">{vol.name}</p>
+                                                    <p className="text-xs text-slate-500 font-mono mt-1">{vol.phone}</p>
+                                                </div>
+                                                <a 
+                                                    href={getWALink(vol.phone, msg)}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shadow-sm"
+                                                >
+                                                    <MessageCircle size={14}/> Kirim WA
+                                                </a>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="text-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
+                                        <Info size={32} className="text-slate-400 mx-auto mb-3" />
+                                        <p className="text-slate-500 text-sm">Tidak ada relawan yang berstatus "Aktif", golongan darah sesuai, dan "Siap Donor" (melewati jeda 90 hari) saat ini.</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -972,7 +1096,7 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                                     {volunteers.map(vol => (
                                         <tr key={vol.id} className="hover:bg-slate-50 transition-colors text-left">
                                             <td className="p-4 font-bold text-slate-800 text-left">{vol.name}</td>
-                                            <td className="p-4 text-center font-bold text-red-600">{vol.bloodType}{vol.rhesus}</td>
+                                            <td className="p-4 text-center font-bold text-red-600">{vol.bloodType}{safeText(vol.rhesus)}</td>
                                             <td className="p-4 text-center text-sm font-mono">{vol.phone}</td>
                                             <td className="p-4 text-right">
                                                 <button onClick={() => setEditingVolunteer(vol)} className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase hover:bg-blue-100 flex items-center gap-1 ml-auto"><Edit3 size={14}/> Edit Data</button>
@@ -1068,6 +1192,17 @@ const AdminPanel = ({ volunteers, setVolunteers, requests, setRequests, pmiStock
                     </div>
                 )}
             </main>
+
+            {/* MODAL KONFIRMASI */}
+            {confirmAction && (
+                <ConfirmModal 
+                    isOpen={!!confirmAction}
+                    title={confirmAction.title}
+                    message={confirmAction.message}
+                    onConfirm={confirmAction.onConfirm}
+                    onCancel={() => setConfirmAction(null)}
+                />
+            )}
 
             {/* MODAL EDIT RELAWAN */}
             {editingVolunteer && (
@@ -1230,7 +1365,6 @@ const Footer = ({ setView }) => (
     </footer>
 );
 
-// --- FORMS SUBCOMPONENTS ---
 const RequestForm = ({ onSubmit, isLoading }) => {
   const [form, setForm] = useState({ patient: '', hospital: '', bloodType: 'A', rhesus: '+', amount: '', contact: '', contact2: '' });
   return (
